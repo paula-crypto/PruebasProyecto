@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d3b2e"/>
+      <stop offset="55%" stop-color="#1f6e4a"/>
+      <stop offset="100%" stop-color="#39A900"/>
+    </linearGradient>
+    <pattern id="iconPattern" width="220" height="220" patternUnits="userSpaceOnUse" patternTransform="rotate(-12)">
+      <g fill="#ffffff" opacity="0.06">
+        
+        <rect x="24" y="10" width="52" height="70" rx="4"/>
+        <line x1="34" y1="26" x2="66" y2="26" stroke="#ffffff" stroke-width="3"/>
+        <line x1="34" y1="36" x2="66" y2="36" stroke="#ffffff" stroke-width="3"/>
+        <line x1="34" y1="46" x2="56" y2="46" stroke="#ffffff" stroke-width="3"/>
+        <path d="M20 70 L82 92 L74 96 L66 88 L58 94 L52 84 Z"/>
+    
+      </g>
+    </pattern>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#bgGrad)"/>
+  <rect width="1920" height="1080" fill="url(#iconPattern)"/>
+
+  <!-- Franja institucional SENA -->
+  <rect x="0" y="0" width="1920" height="10" fill="#ffffff" opacity="0.55"/>
+  <rect x="0" y="1070" width="1920" height="10" fill="#ffffff" opacity="0.55"/>
+
+  <!-- Icono grande decorativo -->
+  <g transform="translate(1330,300) scale(4.4)" opacity="0.16" fill="#ffffff">
+    
+        <rect x="24" y="10" width="52" height="70" rx="4"/>
+        <line x1="34" y1="26" x2="66" y2="26" stroke="#ffffff" stroke-width="3"/>
+        <line x1="34" y1="36" x2="66" y2="36" stroke="#ffffff" stroke-width="3"/>
+        <line x1="34" y1="46" x2="56" y2="46" stroke="#ffffff" stroke-width="3"/>
+        <path d="M20 70 L82 92 L74 96 L66 88 L58 94 L52 84 Z"/>
+    
+  </g>
+
+  <!-- Marca de agua institucional -->
+  <text x="70" y="1010" font-family="Arial, Helvetica, sans-serif" font-size="30" fill="#ffffff" opacity="0.55" letter-spacing="3">
+    SERVICIO NACIONAL DE APRENDIZAJE - SENA
+  </text>
+  <text x="70" y="960" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="bold" fill="#ffffff" opacity="0.85">
+    Panel de Responsable de Área - SENA
+  </text>
+</svg>

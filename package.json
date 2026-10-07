@@ -1,0 +1,16 @@
+{
+  "name": "paz-y-salvo-sena",
+  "version": "1.0.0",
+  "description": "Sistema de Gestion de Paz y Salvo Contractual SENA (GCCON-F-088) - Frontend y Backend Unificados",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "start": "cd backend && npm start",
+    "seed": "cd backend && npm run seed",
+    "build:frontend": "cd frontend && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
