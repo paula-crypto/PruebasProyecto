@@ -14,17 +14,14 @@ const app = express();
 app.use(helmet());
 app.use(morgan('dev'));
 
-// CORS con lista blanca desde CORS_ORIGIN (separada por comas) o localhost en desarrollo
-const origenesPermitidos = (process.env.CORS_ORIGIN || '').split(',').map(o => o.trim()).filter(Boolean);
+// CORS: Permite cualquier origen web (incluyendo todas las URLs de Vercel, localhost y dominios de despliegue)
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin || origenesPermitidos.length === 0 || origenesPermitidos.includes(origin) || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Origen no permitido por CORS.'));
-        }
+        callback(null, true);
     },
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
 
 app.use(express.json({ limit: '50mb' }));
