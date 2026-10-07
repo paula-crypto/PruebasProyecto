@@ -1,40 +1,35 @@
 # PRD: Sistema de Gestión de Paz y Salvo Contractual (SENA GCCON-F-088)
-## Especificación de Requisitos de Producto y Suite Maestra de 55 Casos de Prueba Automatizados (TestSprite)
+## Especificación de Requisitos de Producto y Matriz Maestra de 70 Casos de Prueba (TestSprite)
 
-**Versión:** 2.5  
+**Versión:** 3.0  
 **Fecha:** Octubre 2026  
 **Entorno de Ejecución:** Producción / Staging  
 **Frontend URL:** `https://pruebasproyecto-frontend.vercel.app`  
 **Backend API URL:** `https://api-paz-y-salvo.onrender.com/api`  
 **Base de Datos:** MongoDB Atlas Cluster (`pazysalvo_sena`)  
-**Estándar Oficial SENA:** Formato Institucional GCCON-F-088  
-**Total de Casos de Prueba:** 55 Casos Formales (`TC-001` a `TC-055`)  
+**Estándar Oficial:** Formato Institucional SENA GCCON-F-088  
+**Objetivo de Cobertura en TestSprite:** Mínimo garantizado $\ge 50$ pruebas ejecutables (70 casos formalizados).
 
 ---
 
 ## 1. Visión General del Producto y Objetivos
 
 ### 1.1 Declaración del Problema y Solución
-Tradicionalmente en el SENA (Centro Agroturístico San Gil - Regional Santander), la liquidación y expedición del formato **GCCON-F-088** (*"Entrega de Bienes e Información de Ejecución Contractual por el Contratista"*) se realizaba de manera física y manual. Esto provocaba tiempos de trámite de hasta 15 días, riesgos de suplantación en casillas de dependencias y falta de trazabilidad en bienes devueltos (TIC, almacén, biblioteca).
+El trámite de liquidación y expedición del formato institucional **GCCON-F-088** (*"Entrega de Bienes e Información de Ejecución Contractual por el Contratista"*) en el Centro Agroturístico San Gil - Regional Santander se realizaba de manera itinerante en papel, tardando más de 15 días y presentando riesgos de suplantación.
 
-El **Sistema de Paz y Salvo SENA GCCON-F-088** digitaliza todo el ciclo de vida:
-1. Radicación de solicitud por el contratista con validación estricta de su cédula y vigencia anual (`CNT-YYYY-XXX`).
-2. Cuadrícula de 14 dependencias con validación RBAC: cada funcionario únicamente puede firmar su casilla asignada.
-3. Módulo de retención y alertas por bienes pendientes (marca de agua de rechazo).
-4. Firma final del supervisor en Fila 14 y exportación a PDF oficial idéntico al estándar SENA.
-
-### 1.2 Objetivos de la Batería de Pruebas en TestSprite
-- **Cobertura Mínima:** 55 casos de prueba ejecutados y verificados.
-- **Tasa de Aprobación Esperada (Pass Rate):** $\ge 98\%$.
-- **Cero Fugas de Seguridad:** Cero accesos indebidos entre contratistas y protección de endpoints sin token.
+El **Sistema de Paz y Salvo SENA GCCON-F-088** es una plataforma web progresiva (Vue 3, Quasar, Node.js, Express, MongoDB Atlas) que automatiza el ciclo completo:
+1. Radicación digital por el contratista con validación estricta de su cédula y vigencia anual (`CNT-YYYY-XXX`).
+2. Cuadrícula oficial de 14 dependencias con validación RBAC por titularidad de casilla.
+3. Control de retención y alertas por bienes pendientes de devolución.
+4. Firma final del supervisor en Fila 14 y exportación a PDF idéntico al estándar SENA.
 
 ---
 
-## 2. Catálogo de Roles y Credenciales Maestras de Prueba
+## 2. Catálogo Maestro de Roles y Credenciales de Prueba
 
-Todos los usuarios listados a continuación están precargados en el backend y la base de datos de MongoDB Atlas:
+Todos los usuarios listados a continuación están activos en MongoDB Atlas y disponibles para la ejecución de pruebas automatizadas:
 
-| # | Rol del Sistema | Nombre del Funcionario | Correo Electrónico | Contraseña | Cargo / Dependencia | Documento / Cédula | No. Contrato / Casilla |
+| # | Rol del Sistema | Nombre del Funcionario | Correo Electrónico | Contraseña | Cargo / Dependencia | Cédula / Documento | Casilla / Alcance |
 |:---:|:---|:---|:---|:---:|:---|:---:|:---:|
 | **1** | `ADMINISTRADOR` | Administrador General | `admin@gccon.com` | `admin` *(o `Admin1234!`)* | Administrador del Sistema | `1095000001` | Todas las áreas |
 | **2** | `ADMINISTRADOR` | Paula Administradora | `paula.admin@gccon.com` | `123` | Coordinadora Aseguramiento | `1095000002` | Todas las áreas |
@@ -62,134 +57,428 @@ Todos los usuarios listados a continuación están precargados en el backend y l
 
 ---
 
-## 3. Matriz Oficial de 14 Filas del Formato SENA GCCON-F-088
+## 3. Matriz Oficial de 14 Filas del Formato GCCON-F-088
 
-| Fila | Área Institucional Evaluadora | Responsable Autorizado | Bienes / Obligaciones Auditadas |
+| Fila | Área Institucional Evaluadora | Responsable Autorizado | Bienes y Compromisos Verificados |
 |:---:|:---|:---|:---|
-| **01** | Gestión de TIC | Franklin Rolando Chacón | Correo institucional, acceso a sistemas, equipos asignados |
-| **02** | Administración de Documentos | Hilda Lucía Ramírez | Archivos de gestión, expedientes físicos y digitales |
-| **03** | Coordinación de Área / Académica | Johon Fredy Sanabria | Entrega de informes técnicos y cumplimiento de metas |
-| **04** | Almacén e Inventarios | Lic. Martha Almacén | Devolución de bienes muebles, herramientas y periféricos |
-| **05** | Servicios Generales y Adquisiciones | Juan David Silva | Carné institucional, llaves y elementos de intendencia |
-| **06** | Contabilidad | Zaida Leny Melgarejo | Cuentas de cobro, conciliación de pagos y pólizas |
-| **07** | Tesorería | Nelcy Mabel Mayorga | Anticipos liquidados, retenciones y estampillas |
-| **08** | Biblioteca | Andrea Juliana Celis | Libros, material bibliográfico y recursos digitales prestados |
-| **09** | Líder SIGA | Zaida Jeleidy García | Registros de calidad, procedimientos y auditorías internas |
-| **10** | Administración Educativa | Erika Johana Gómez | Juicios evaluativos en Sofía Plus / Zajuna |
-| **11** | Apoyo al Seguimiento Administrativo | Nelson Fabián Duarte | Novedades contractuales y constancias de soporte |
-| **12** | Apoyo Etapa Productiva | Karen Andrea García | Seguimiento a fichas y aprendices asignados |
-| **13** | Apoyo a Procesos y Novedades | Eileen Erlensi Hurtado | Verificación de bitácoras y registros finales |
-| **14** | Supervisor de Contrato | Ing. Carlos Supervisor | Aprobación final integral y emisión del Paz y Salvo |
+| **01** | Gestión de TIC | Franklin Rolando Chacón | Cuenta de correo, acceso a plataformas, laptops y periféricos |
+| **02** | Administración de Documentos | Hilda Lucía Ramírez | Archivo de gestión, expedientes contractuales, correspondencia |
+| **03** | Coordinación de Área / Académica | Johon Fredy Sanabria | Informes de ejecución, actas y cumplimiento de obligaciones |
+| **04** | Almacén e Inventarios | Lic. Martha Almacén | Devolución de bienes muebles, equipos de cómputo y herramientas |
+| **05** | Servicios Generales y Adquisiciones | Juan David Silva | Carnet institucional SENA, llaves y elementos de oficina |
+| **06** | Contabilidad | Zaida Leny Melgarejo | Cuentas de cobro, causaciones, estampillas y retenciones |
+| **07** | Tesorería | Nelcy Mabel Mayorga | Pagos efectivos, giros y pólizas de cumplimiento |
+| **08** | Biblioteca | Andrea Juliana Celis | Libros prestados, llaves de casilleros y material bibliográfico |
+| **09** | Líder SIGA | Zaida Jeleidy García | Procedimientos del Sistema Integrado de Gestión y Calidad |
+| **10** | Administración Educativa | Erika Johana Gómez | Cierre de fichas, juicios evaluativos en Sofía Plus / Zajuna |
+| **11** | Apoyo al Seguimiento Administrativo | Nelson Fabián Duarte | Control de tiempos, constancias y novedades del contrato |
+| **12** | Apoyo Etapa Productiva | Karen Andrea García | Reportes y seguimientos a aprendices en etapa productiva |
+| **13** | Apoyo a Procesos y Novedades | Eileen Erlensi Hurtado | Bitácoras finales y soportes administrativos del centro |
+| **14** | Supervisor de Contrato | Ing. Carlos Supervisor | Revisión final integral y firma de expedición del Paz y Salvo |
 
 ---
 
-## 4. Batería Completa de 55 Casos de Prueba (Suite E2E para TestSprite)
+## 4. Matriz Maestra de 70 Casos de Prueba (Suite Detallada para TestSprite)
 
-```mermaid
-flowchart TD
-    M1[Módulo 1: Autenticación & Seguridad - TC 01-10]
-    M2[Módulo 2: RBAC & Control de Acceso - TC 11-18]
-    M3[Módulo 3: Aislamiento & Privacidad - TC 19-24]
-    M4[Módulo 4: Radicación GCCON-F-088 - TC 25-32]
-    M5[Módulo 5: Circuito de Firmas 1-14 - TC 33-44]
-    M6[Módulo 6: Rechazos & Novedades - TC 45-49]
-    M7[Módulo 7: Administración & Auditoría - TC 50-55]
-    
-    M1 --> M2 --> M3 --> M4 --> M5 --> M6 --> M7
-```
+### Módulo 1: Autenticación, Seguridad y Gestión de Sesión (Casos 01 al 10)
 
-### Módulo 1: Autenticación, Seguridad y Gestión de Sesión (10 Pruebas)
-- **`TC-001` - Login Exitoso de Administrador:** Autenticar con `admin@gccon.com` / `admin`. Esperado: HTTP 200, JWT generado y guardado en `localStorage(auth_token)`, redirección a dashboard.
-- **`TC-002` - Login Exitoso de Supervisor:** Autenticar con `supervisor@gccon.com` / `super`. Esperado: Redirección autorizada a solicitudes con rol `SUPERVISOR`.
-- **`TC-003` - Login Exitoso de Contratista:** Autenticar con `carlos.mendoza@email.com` / `123`. Esperado: Carga de sesión de contratista con sus datos y cédula.
-- **`TC-004` - Login Exitoso de Responsable de Área:** Autenticar con `franklin.chacon@sena.edu.co` / `123`. Esperado: Rol `RESPONSABLE_AREA` activado para Fila 1 (TIC).
-- **`TC-005` - Login Fallido por Contraseña Inválida:** Autenticar con contraseña errónea. Esperado: HTTP 401, mensaje *"Credenciales inválidas"*, sin generar token.
-- **`TC-006` - Bloqueo de Cuenta por 3 Intentos Fallidos:** Enviar 3 intentos con clave errónea consecutivamente. Esperado: HTTP 403, cuenta bloqueada temporalmente por 15 minutos.
-- **`TC-007` - Solicitud de Recuperación con Correo Válido:** Enviar `POST /api/auth/recuperar` con correo registrado. Esperado: HTTP 200, generación de token efímero de recuperación.
-- **`TC-008` - Anti-Enumeración en Recuperación:** Enviar correo inexistente en recuperación. Esperado: HTTP 200 con mensaje neutro genérico para prevenir enumeración de usuarios.
-- **`TC-009` - Validación de Token de Restablecimiento Expirado:** Enviar token inválido o vencido en `POST /api/auth/restablecer`. Esperado: HTTP 400 *"El enlace es inválido o ha expirado"*.
-- **`TC-010` - Cierre de Sesión (Logout) Integral:** Ejecutar acción de logout. Esperado: Eliminación de `auth_token` y `gccon_user` de `localStorage`, redirección a `#/login`.
+* **TC-001: Login Exitoso con Rol Administrador**
+  * *Actor:* Administrador General (`admin@gccon.com` / `admin`).
+  * *Pasos:* Ingresar credenciales en `#/login` y hacer clic en Ingresar.
+  * *Resultado Esperado:* Respuesta HTTP 200, JWT almacenado en `localStorage(auth_token)`, redirección exitosa a `#/app/solicitudes`.
 
-### Módulo 2: Control de Acceso Basado en Roles (RBAC) (8 Pruebas)
-- **`TC-011` - Bloqueo a Contratista en Vista de Usuarios:** Contratista navega a `#/app/usuarios`. Esperado: Redirección inmediata o banner *"No tiene permisos para acceder"*.
-- **`TC-012` - Bloqueo a Contratista en Vista de Supervisores:** Contratista navega a `#/app/supervisores`. Esperado: Acceso denegado.
-- **`TC-013` - Bloqueo a Contratista en Gestión de Dependencias:** Contratista intenta ingresar a `#/app/dependencias`. Esperado: Acceso bloqueado por Route Guard.
-- **`TC-014` - Acceso Exclusivo de Supervisor a Contratos:** Supervisor visualiza solicitudes en supervisión pero no tiene acceso a creación de administradores.
-- **`TC-015` - Bloqueo a Supervisor en Desactivación de Áreas:** Supervisor intenta ejecutar PATCH sobre estado de dependencias. Esperado: HTTP 403.
-- **`TC-016` - Responsable de Área Accede a Bandeja de Firmas:** Usuario con rol `RESPONSABLE_AREA` accede a la tabla de solicitudes para evaluar su área. Esperado: Acceso concedido.
-- **`TC-017` - Bloqueo a Responsable de Área en Módulo de Usuarios:** Responsable intenta invocar `POST /api/usuarios`. Esperado: HTTP 403 *"Rol no autorizado"*.
-- **`TC-018` - Petición a Endpoint Protegido sin Token:** Ejecutar `GET /api/usuarios` sin cabecera `Authorization`. Esperado: Fallback seguro o rechazo HTTP 401.
+* **TC-002: Login Exitoso con Rol Supervisor**
+  * *Actor:* Ing. Carlos Supervisor (`supervisor@gccon.com` / `super`).
+  * *Pasos:* Ingresar credenciales en `#/login`.
+  * *Resultado Esperado:* Sesión iniciada con rol `SUPERVISOR`, acceso a bandeja de contratos bajo supervisión.
 
-### Módulo 3: Aislamiento y Privacidad de Información (6 Pruebas)
-- **`TC-019` - Contratista Solo Visualiza sus Propios Contratos:** Iniciar sesión con Carlos Mendoza. Esperado: En la tabla solo figura `CNT-2026-042`.
-- **`TC-020` - Aislamiento entre Contratistas Distintos:** Verificar que Carlos Mendoza no pueda ver la solicitud `CNT-2026-014` de Laura Andrea Contratista.
-- **`TC-021` - Filtro Automático en Backend por Identidad:** `GET /api/contratos` invocado con token de contratista restringe la consulta en MongoDB por su `usuario_id`.
-- **`TC-022` - Intento de Acceso Directo por URL a Contrato Ajeno:** Contratista navega a `#/app/solicitudes/:id` de otro usuario. Esperado: Mensaje de error o redirección.
-- **`TC-023` - Supervisor Solo Visualiza Contratos de su Jurisdicción:** Supervisor TIC visualiza solicitudes asignadas a él y no contratos de otras dependencias no asignadas.
-- **`TC-024` - Administrador Visualiza Consolidado Global:** Administrador visualiza el 100% de las solicitudes de todos los contratistas y áreas.
+* **TC-003: Login Exitoso con Rol Contratista**
+  * *Actor:* Carlos Eduardo Mendoza (`carlos.mendoza@email.com` / `123`).
+  * *Pasos:* Iniciar sesión en `#/login`.
+  * *Resultado Esperado:* Sesión iniciada con rol `CONTRATISTA`, cargando cédula `1097890123` y contrato `CNT-2026-042`.
 
-### Módulo 4: Radicación de Solicitudes y Formato GCCON-F-088 (8 Pruebas)
-- **`TC-025` - Radicación con Nomenclatura de Vigencia Anual Actual:** Crear solicitud con formato `CNT-2026-001`. Esperado: Registro exitoso con vigencia 2026.
-- **`TC-026` - Autocompletado Obligatorio de Cédula:** Abrir modal de radicación. Esperado: El campo Documento carga la cédula del contratista (`1097890123`) sin guiones `—` ni vacíos.
-- **`TC-027` - Validación de Campos Requeridos en Radicación:** Intentar radicar con campos obligatorios vacíos. Esperado: Validación frontend bloquea el botón y notifica.
-- **`TC-028` - Adjuntar Soporte PDF de Informe Final:** Cargar archivo `.pdf` en el formulario. Esperado: Carga exitosa con previsualización del nombre del archivo.
-- **`TC-029` - Rechazo de Archivos con Formatos No Permitidos:** Intentar subir archivo `.exe` o `.zip`. Esperado: Validación de tipo de archivo bloquea la carga.
-- **`TC-030` - Firma Manuscrita en Canvas del Contratista:** Dibujar trazo en componente Canvas. Esperado: Conversión limpia a Base64 PNG transparente.
-- **`TC-031` - Validación de Firma en Blanco:** Intentar radicar sin firmar el canvas. Esperado: Notificación *"Debe estampar su firma manuscrita para radicar"*.
-- **`TC-032` - Inicialización de Casillas de Trazabilidad:** Al crearse la solicitud, el sistema inicializa las 14 casillas en estado `Pendiente`.
+* **TC-004: Login Exitoso con Rol Responsable de Área (TIC)**
+  * *Actor:* Franklin Rolando Chacón (`franklin.chacon@sena.edu.co` / `123`).
+  * *Pasos:* Iniciar sesión en `#/login`.
+  * *Resultado Esperado:* Sesión iniciada con rol `RESPONSABLE_AREA`, habilitado para firmar Fila 1 (TIC).
 
-### Módulo 5: Circuito Oficial de Firmas (Filas 1 a 14) (12 Pruebas)
-- **`TC-033` - Firma Exitosa en Fila 01 (Gestión TIC):** Franklin Chacón firma en su casilla de TIC. Esperado: Estampa firma, registra fecha y cambia casilla a `Firmado`.
-- **`TC-034` - Bloqueo de Firma Cruzada No Autorizada:** Franklin Chacón (TIC) intenta firmar en la Fila 04 (Almacén). Esperado: Sistema bloquea con alerta *"Casilla exclusiva de Almacén e Inventarios"*.
-- **`TC-035` - Firma Exitosa en Fila 02 (Administración Documentos):** Hilda Ramírez firma en Fila 02. Esperado: Casilla 2 actualizada.
-- **`TC-036` - Firma Exitosa en Fila 03 (Coordinación Académica):** Johon Sanabria firma en Fila 03. Esperado: Casilla 3 actualizada.
-- **`TC-037` - Firma Exitosa en Fila 04 (Almacén e Inventarios):** Martha Almacén firma en Fila 04. Esperado: Casilla 4 actualizada.
-- **`TC-038` - Firma Exitosa en Fila 05 (Servicios Generales):** Juan David Silva firma en Fila 05. Esperado: Casilla 5 actualizada.
-- **`TC-039` - Firma Exitosa en Fila 06 (Contabilidad):** Zaida Melgarejo firma en Fila 06. Esperado: Casilla 6 actualizada.
-- **`TC-040` - Firma Exitosa en Fila 07 (Tesorería):** Nelcy Mayorga firma en Fila 07. Esperado: Casilla 7 actualizada.
-- **`TC-041` - Firma Exitosa en Fila 08 (Biblioteca):** Andrea Celis firma en Fila 08. Esperado: Casilla 8 actualizada.
-- **`TC-042` - Registro de Metadatos de Auditoría por Firma:** Verificar que cada firma conserve Timestamp ISO, hash y nombre del funcionario firmante.
-- **`TC-043` - Prelación de Firmas para Supervisor:** Supervisor intenta firmar Fila 14 antes de que las 13 áreas previas hayan completado. Esperado: Alerta de firmas pendientes requeridas.
-- **`TC-044` - Firma Final del Supervisor en Fila 14:** Habiendo completado las 13 áreas, el Supervisor firma en la Fila 14. Esperado: Solicitud cambia a estado `Firmado` / `Paz y Salvo`.
+* **TC-005: Rechazo de Autenticación por Contraseña Incorrecta**
+  * *Actor:* Usuario no autorizado (`admin@gccon.com` / `claveErronea999`).
+  * *Pasos:* Intentar iniciar sesión con contraseña errónea.
+  * *Resultado Esperado:* HTTP 401, mensaje *"Credenciales inválidas"*, no se genera token.
 
-### Módulo 6: Gestión de Rechazos, Novedades y Retención (5 Pruebas)
-- **`TC-045` - Registro de Rechazo por Bien Pendiente:** Responsable de Almacén rechaza indicando *"Pendiente entrega de escáner portátil"*. Esperado: Estado cambia a `Rechazado`.
-- **`TC-046` - Despliegue de Banner de Novedad:** Visualizar la solicitud rechazada. Esperado: Banner visible con el motivo exacto ingresado por el evaluador.
-- **`TC-047` - Estampado de Marca de Agua de Rechazo:** Previsualizar certificado de solicitud rechazada. Esperado: Marca de agua diagonal *"SOLICITUD RECHAZADA - NO VÁLIDO"*.
-- **`TC-048` - Retención Preventiva de la Firma del Contratista:** En estado rechazado, la firma del contratista permanece retenida y no se emite paz y salvo.
-- **`TC-049` - Subsanación y Limpieza de Novedades:** Una vez devuelto el bien y firmado por el área, el banner de rechazo se retira automáticamente.
+* **TC-006: Bloqueo Temporal de Cuenta tras 3 Intentos Fallidos Consecutivos**
+  * *Actor:* Usuario bloqueable (`admin@gccon.com`).
+  * *Pasos:* Enviar 3 solicitudes de login consecutivas con contraseña equivocada.
+  * *Resultado Esperado:* HTTP 403, cuenta bloqueada por 15 minutos, mensaje *"Ha superado los 3 intentos fallidos"*.
 
-### Módulo 7: Administración, Seguridad y Certificación PDF (6 Pruebas)
-- **`TC-050` - Creación de Usuario con Clave Compleja:** Admin crea usuario con contraseña válida (`Admin2026*`). Esperado: HTTP 201 y persistencia en MongoDB.
-- **`TC-051` - Validación de Complejidad de Contraseña en Registro:** Intentar crear usuario con clave débil (`123456`). Esperado: Bloqueo requiriendo 8 caracteres, mayúscula, minúscula y número.
-- **`TC-052` - Validación de Correo Institucional Duplicado:** Intentar registrar un usuario con correo ya existente. Esperado: HTTP 400 *"El correo institucional o documento ya está registrado"*.
-- **`TC-053` - Diálogo Humanizado en Desactivación:** Admin desactiva una dependencia. Esperado: El diálogo de confirmación muestra el nombre explícito del área y no un código crudo.
-- **`TC-054` - Expulsión Inmediata de Usuario Deshabilitado:** Admin cambia estado a inactivo (`activo: false`). Esperado: La siguiente petición del usuario deshabilitado responde HTTP 401.
-- **`TC-055` - Generación y Descarga Fidedigna del PDF GCCON-F-088:** Presionar botón de descarga en solicitud aprobada. Esperado: Descarga de documento PDF idéntico al estándar SENA con cabecera oficial, datos de contrato, 14 firmas y pie de página institucional.
+* **TC-007: Solicitud de Recuperación de Contraseña con Correo Registrado**
+  * *Actor:* Usuario solicitante (`carlos.mendoza@email.com`).
+  * *Pasos:* Enviar `POST /api/auth/recuperar` con correo registrado.
+  * *Resultado Esperado:* HTTP 200, token efímero de recuperación de 15 minutos generado en backend.
+
+* **TC-008: Protección Anti-Enumeración en Recuperación de Contraseña**
+  * *Actor:* Usuario atacante (`correo.no.existe@sena.edu.co`).
+  * *Pasos:* Enviar solicitud de recuperación con correo inexistente.
+  * *Resultado Esperado:* HTTP 200 con mensaje neutro institucional *"Si el correo existe, se ha enviado un enlace"*.
+
+* **TC-009: Rechazo de Token de Recuperación Expirado o Manipulado**
+  * *Actor:* Usuario con token caduco.
+  * *Pasos:* Enviar `POST /api/auth/restablecer` con token vencido y nueva clave.
+  * *Resultado Esperado:* HTTP 400 *"El enlace es inválido o ha expirado"*.
+
+* **TC-010: Cierre de Sesión Completo y Purga de Almacenamiento Local**
+  * *Actor:* Cualquier usuario autenticado.
+  * *Pasos:* Clic en perfil de usuario y seleccionar "Cerrar Sesión".
+  * *Resultado Esperado:* Eliminación inmediata de `auth_token` y `gccon_user` en `localStorage`, redirección obligatoria a `#/login`.
 
 ---
 
-## 5. Matriz de Endpoints para Pruebas Automatizadas de API
+### Módulo 2: Control de Acceso Basado en Roles (RBAC) (Casos 11 al 20)
 
-| Test Case Asignado | Método | Endpoint Backend | Rol Requerido | Payload / Parámetros | Código Esperado |
-|:---|:---|:---|:---|:---|:---:|
-| `TC-001` - `TC-005` | `POST` | `/api/auth/login` | Público | `{ correo, password }` | `200 OK` / `401 Unauthorized` |
-| `TC-007` - `TC-008` | `POST` | `/api/auth/recuperar` | Público | `{ correo_institucional }` | `200 OK` |
-| `TC-009` | `POST` | `/api/auth/restablecer` | Público | `{ token, nueva_password }` | `400 Bad Request` |
-| `TC-011` - `TC-018` | `GET` | `/api/usuarios` | `ADMINISTRADOR` | Header `Authorization` | `200 OK` / `403 Forbidden` |
-| `TC-019` - `TC-024` | `GET` | `/api/contratos` | Todos (filtrado) | Header `Authorization` | `200 OK` (dataset aislado) |
-| `TC-025` - `TC-032` | `POST` | `/api/contratos` | `CONTRATISTA` | Datos de contrato y cédula | `201 Created` |
-| `TC-033` - `TC-044` | `POST` | `/api/firmas` | `RESPONSABLE_AREA` | `{ contrato_id, fila, firma }` | `200 OK` / `403 Forbidden` |
-| `TC-045` - `TC-049` | `PATCH`| `/api/contratos/:id/estado`| `RESPONSABLE_AREA`| `{ estado, motivo_rechazo }` | `200 OK` |
-| `TC-050` - `TC-052` | `POST` | `/api/usuarios` | `ADMINISTRADOR` | `{ nombre, correo, doc, pass }` | `201 Created` / `400 Bad Request` |
-| `TC-053` - `TC-054` | `PATCH`| `/api/usuarios/estado/:id` | `ADMINISTRADOR` | `{ activo: false }` | `200 OK` |
-| `TC-055` | `GET` | `/api/contratos/:id/pdf` | `CONTRATISTA`, `SUPER`| Header `Authorization` | `200 OK` (`application/pdf`) |
+* **TC-011: Bloqueo de Acceso a Contratista en Gestión de Usuarios**
+  * *Actor:* Contratista autenticado.
+  * *Pasos:* Intentar navegar directamente a la URL `#/app/usuarios`.
+  * *Resultado Esperado:* Redirección bloqueada por Route Guard a `#/app/solicitudes` o pantalla de permisos insuficientes.
+
+* **TC-012: Bloqueo de Acceso a Contratista en Gestión de Supervisores**
+  * *Actor:* Contratista autenticado.
+  * *Pasos:* Intentar acceder a `#/app/supervisores`.
+  * *Resultado Esperado:* Acceso denegado, menú lateral oculta la opción.
+
+* **TC-013: Bloqueo de Acceso a Contratista en Configuración de Dependencias**
+  * *Actor:* Contratista autenticado.
+  * *Pasos:* Intentar acceder a `#/app/dependencias`.
+  * *Resultado Esperado:* Acceso bloqueado.
+
+* **TC-014: Visualización Restringida de Opciones de Menú para Rol Supervisor**
+  * *Actor:* Supervisor autenticado.
+  * *Pasos:* Verificar opciones del menú lateral.
+  * *Resultado Esperado:* Visualiza Solicitudes, Contratistas y Reportes; no visualiza Administración Global de Usuarios ni logs del sistema.
+
+* **TC-015: Bloqueo a Supervisor en Desactivación de Dependencias**
+  * *Actor:* Supervisor autenticado.
+  * *Pasos:* Intentar enviar `PATCH /api/dependencias/:id` para desactivar un área.
+  * *Resultado Esperado:* HTTP 403 *"Acceso no autorizado"*.
+
+* **TC-016: Acceso Autorizado de Responsable de Área a su Bandeja**
+  * *Actor:* Responsable de Área autenticado.
+  * *Pasos:* Navegar a `#/app/solicitudes`.
+  * *Resultado Esperado:* Acceso permitido para revisar y firmar su área respectiva.
+
+* **TC-017: Bloqueo a Responsable de Área en Creación de Nuevos Usuarios**
+  * *Actor:* Responsable de Área autenticado.
+  * *Pasos:* Enviar `POST /api/usuarios`.
+  * *Resultado Esperado:* HTTP 403 *"Rol no autorizado para crear usuarios"*.
+
+* **TC-018: Bloqueo de Peticiones a la API sin Cabecera de Autorización**
+  * *Actor:* Cliente anónimo sin token.
+  * *Pasos:* Enviar `GET /api/usuarios` omitiendo el header `Authorization`.
+  * *Resultado Esperado:* Solicitud no autorizada o tratada bajo perfil seguro.
+
+* **TC-019: Acceso Pleno de Administrador a Todos los Módulos**
+  * *Actor:* Administrador General.
+  * *Pasos:* Navegar a Usuarios, Supervisores, Contratistas, Dependencias y Solicitudes.
+  * *Resultado Esperado:* Acceso 100% habilitado en todas las vistas y acciones CRUD.
+
+* **TC-020: Expulsión de Sesión ante Token JWT Expirado (HTTP 401)**
+  * *Actor:* Usuario con sesión de más de 8 horas.
+  * *Pasos:* Realizar una petición con token expirado.
+  * *Resultado Esperado:* Interceptor detecta HTTP 401, limpia localStorage y redirige a `#/login`.
 
 ---
 
-## 6. Criterios de Aceptación para la Suite TestSprite
+### Módulo 3: Aislamiento y Privacidad de la Información (Casos 21 al 28)
 
-1. **Cantidad Total de Pruebas:** Exactamente 55 casos de prueba ejecutables.
-2. **Tasa de Aprobación Global:** $\ge 98\%$ satisfactorio.
-3. **Tiempo Máximo de Respuesta de API:** $\le 500\text{ ms}$ por petición.
-4. **Integridad de Base de Datos:** Cada transacción confirmada debe persistir en el cluster de MongoDB Atlas sin estados huérfanos.
+* **TC-021: Contratista 1 Visualiza Únicamente sus Contratos Propios**
+  * *Actor:* Carlos Eduardo Mendoza (`carlos.mendoza@email.com`).
+  * *Pasos:* Cargar listado en `#/app/solicitudes`.
+  * *Resultado Esperado:* La tabla muestra exclusivamente el contrato `CNT-2026-042`.
+
+* **TC-022: Contratista 1 No Puede Ver Solicitudes de Contratista 2**
+  * *Actor:* Carlos Eduardo Mendoza.
+  * *Pasos:* Verificar listado en pantalla.
+  * *Resultado Esperado:* El contrato `CNT-2026-014` de Laura Andrea Contratista no figura en la tabla ni en los datos de red.
+
+* **TC-023: Filtro Automático por ID de Usuario en Backend para Contratistas**
+  * *Actor:* Contratista autenticado.
+  * *Pasos:* Ejecutar `GET /api/contratos`.
+  * *Resultado Esperado:* El backend filtra por `req.usuario.id` retornando solo las solicitudes del titular.
+
+* **TC-024: Bloqueo de Acceso Directo por URL a Solicitud de Otro Contratista**
+  * *Actor:* Carlos Mendoza.
+  * *Pasos:* Ingresar por barra de navegación a `#/app/solicitudes/:id` correspondiente al contrato de Laura Andrea.
+  * *Resultado Esperado:* Notificación de error *"No tiene autorización para ver esta solicitud"*.
+
+* **TC-025: Supervisor Visualiza Únicamente Contratos bajo su Asignación**
+  * *Actor:* Ing. Carlos Supervisor.
+  * *Pasos:* Cargar bandeja de solicitudes.
+  * *Resultado Esperado:* Solo se listan solicitudes donde `supervisor_id` coincide con su identificador.
+
+* **TC-026: Supervisor No Visualiza Contratos de Otros Supervisores**
+  * *Actor:* Ing. Carlos Supervisor.
+  * *Pasos:* Verificar tabla de solicitudes.
+  * *Resultado Esperado:* Contratos asignados a Dra. Ana María Gómez no aparecen en su bandeja.
+
+* **TC-027: Administrador Visualiza el Consolidado Global de Solicitudes**
+  * *Actor:* Administrador General.
+  * *Pasos:* Consultar `#/app/solicitudes`.
+  * *Resultado Esperado:* Visualiza la totalidad de solicitudes radicadas en el centro formativo sin filtros restrictivos.
+
+* **TC-028: Ocultamiento de Metadatos Sensibles entre Usuarios**
+  * *Actor:* Contratista consultando contratos.
+  * *Pasos:* Inspeccionar respuesta JSON de la API.
+  * *Resultado Esperado:* Campos como `password_hash`, tokens y datos de auditoría interna no son expuestos.
+
+---
+
+### Módulo 4: Radicación y Creación de Solicitudes GCCON-F-088 (Casos 29 al 38)
+
+* **TC-029: Radicación con Nomenclatura Anual Vigente (2026)**
+  * *Actor:* Contratista (`contratista@gccon.com`).
+  * *Pasos:* Crear nueva solicitud ingresando contrato con vigencia `CNT-2026-014`.
+  * *Resultado Esperado:* Solicitud creada con prefijo anual correcto.
+
+* **TC-030: Autocompletado Obligatorio de Cédula del Contratista**
+  * *Actor:* Contratista.
+  * *Pasos:* Abrir formulario de radicación.
+  * *Resultado Esperado:* El campo Documento/Cédula se autocompleta con `1095432189` sin aparecer vacío ni con guión `—`.
+
+* **TC-031: Validación de Campos Obligatorios en Radicación**
+  * *Actor:* Contratista.
+  * *Pasos:* Intentar radicar dejando vacío el número de contrato y la dependencia.
+  * *Resultado Esperado:* El formulario marca campos en rojo y no permite el envío.
+
+* **TC-032: Carga de Archivo Adjunto de Informe Final en Formato PDF**
+  * *Actor:* Contratista.
+  * *Pasos:* Seleccionar un archivo `informe_final.pdf` y adjuntarlo al formulario.
+  * *Resultado Esperado:* El archivo es aceptado y se muestra el nombre con su tamaño en la UI.
+
+* **TC-033: Rechazo de Formatos de Archivo No Permitidos (.exe, .zip)**
+  * *Actor:* Contratista.
+  * *Pasos:* Intentar subir un archivo `archivo.exe`.
+  * *Resultado Esperado:* Alerta de validación: *"Solo se permiten documentos en formato PDF"*.
+
+* **TC-034: Firma Manuscrita en Componente Canvas del Contratista**
+  * *Actor:* Contratista.
+  * *Pasos:* Realizar un trazo manuscrito en el lienzo táctil/ratón del modal de firma.
+  * *Resultado Esperado:* El componente captura el trazo y lo serializa a imagen PNG transparente en Base64.
+
+* **TC-035: Botón Limpiar Lienzo en Componente Canvas de Firma**
+  * *Actor:* Contratista.
+  * *Pasos:* Dibujar en el canvas y hacer clic en el botón "Limpiar".
+  * *Resultado Esperado:* El lienzo se borra por completo y queda en blanco listo para un nuevo trazo.
+
+* **TC-036: Bloqueo de Radicación con Firma Vacía en Canvas**
+  * *Actor:* Contratista.
+  * *Pasos:* Llenar el formulario pero omitir la firma del canvas, presionando "Radicar".
+  * *Resultado Esperado:* Notificación de advertencia *"Debe estampar su firma para radicar la solicitud"*.
+
+* **TC-037: Inicialización Automática de las 14 Casillas de Trazabilidad**
+  * *Actor:* Backend al procesar la radicación.
+  * *Pasos:* Completar la radicación de la solicitud.
+  * *Resultado Esperado:* En la base de datos se crean automáticamente las 14 casillas en estado `Pendiente`.
+
+* **TC-038: Estado Inicial de la Solicitud Establecido en "En revisión"**
+  * *Actor:* Sistema.
+  * *Pasos:* Consultar la solicitud recién creada.
+  * *Resultado Esperado:* El campo `estado` muestra `"En revisión"`.
+
+---
+
+### Módulo 5: Circuito Oficial de Firmas en Cuadrícula (Filas 1 a 14) (Casos 39 al 52)
+
+* **TC-039: Firma Exitosa en Fila 01 (Gestión de TIC)**
+  * *Actor:* Franklin Rolando Chacón (`franklin.chacon@sena.edu.co`).
+  * *Pasos:* Abrir solicitud y firmar en la Fila 01.
+  * *Resultado Esperado:* Casilla 1 pasa a estado `Firmado`, registrando firma, nombre y fecha.
+
+* **TC-040: Bloqueo de Firma Cruzada de Responsable TIC en Fila 04 (Almacén)**
+  * *Actor:* Franklin Rolando Chacón (TIC).
+  * *Pasos:* Intentar estampar firma en la Fila 04 correspondiente a Almacén e Inventarios.
+  * *Resultado Esperado:* Botón bloqueado o alerta *"Esta casilla corresponde a Almacén e Inventarios"*.
+
+* **TC-041: Firma Exitosa en Fila 02 (Administración de Documentos)**
+  * *Actor:* Hilda Lucía Ramírez (`hilda.ramirez@sena.edu.co`).
+  * *Pasos:* Firmar en la Fila 02.
+  * *Resultado Esperado:* Casilla 2 actualizada a `Firmado`.
+
+* **TC-042: Firma Exitosa en Fila 03 (Coordinación Académica)**
+  * *Actor:* Johon Fredy Sanabria (`johon.sanabria@sena.edu.co`).
+  * *Pasos:* Firmar en la Fila 03.
+  * *Resultado Esperado:* Casilla 3 actualizada a `Firmado`.
+
+* **TC-043: Firma Exitosa en Fila 04 (Almacén e Inventarios)**
+  * *Actor:* Lic. Martha Almacén (`martha.almacen@sena.edu.co`).
+  * *Pasos:* Firmar en la Fila 04.
+  * *Resultado Esperado:* Casilla 4 actualizada a `Firmado`.
+
+* **TC-044: Firma Exitosa en Fila 05 (Servicios Generales y Adquisiciones)**
+  * *Actor:* Juan David Silva (`juan.silva@sena.edu.co`).
+  * *Pasos:* Firmar en la Fila 05.
+  * *Resultado Esperado:* Casilla 5 actualizada a `Firmado`.
+
+* **TC-045: Firma Exitosa en Fila 06 (Contabilidad)**
+  * *Actor:* Zaida Leny Melgarejo (`zaida.melgarejo@sena.edu.co`).
+  * *Pasos:* Firmar en la Fila 06.
+  * *Resultado Esperado:* Casilla 6 actualizada a `Firmado`.
+
+* **TC-046: Firma Exitosa en Fila 07 (Tesorería)**
+  * *Actor:* Nelcy Mabel Mayorga (`nelcy.mayorga@sena.edu.co`).
+  * *Pasos:* Firmar en la Fila 07.
+  * *Resultado Esperado:* Casilla 7 actualizada a `Firmado`.
+
+* **TC-047: Firma Exitosa en Fila 08 (Biblioteca)**
+  * *Actor:* Andrea Juliana Celis (`andrea.celis@sena.edu.co`).
+  * *Pasos:* Firmar en la Fila 08.
+  * *Resultado Esperado:* Casilla 8 actualizada a `Firmado`.
+
+* **TC-048: Firma Exitosa en Fila 09 (Líder SIGA)**
+  * *Actor:* Zaida Jeleidy García (`zaida.garcia@sena.edu.co`).
+  * *Pasos:* Firmar en la Fila 09.
+  * *Resultado Esperado:* Casilla 9 actualizada a `Firmado`.
+
+* **TC-049: Firma Exitosa en Fila 10 (Administración Educativa)**
+  * *Actor:* Erika Johana Gómez (`erika.gomez@sena.edu.co`).
+  * *Pasos:* Firmar en la Fila 10.
+  * *Resultado Esperado:* Casilla 10 actualizada a `Firmado`.
+
+* **TC-050: Firmas en Filas 11, 12 y 13 (Seguimiento, Etapa Productiva y Novedades)**
+  * *Actores:* Nelson Duarte, Karen García y Eileen Hurtado.
+  * *Pasos:* Estampar firmas en las Filas 11, 12 y 13 respectivamente.
+  * *Resultado Esperado:* Las 3 casillas quedan en estado `Firmado`.
+
+* **TC-051: Bloqueo de Firma de Supervisor en Fila 14 si Hay Áreas Pendientes**
+  * *Actor:* Ing. Carlos Supervisor.
+  * *Pasos:* Intentar firmar Fila 14 cuando solo 10 de las 13 áreas previas han firmado.
+  * *Resultado Esperado:* Notificación preventiva: *"No se puede liquidar hasta que las 13 áreas previas firmen"*.
+
+* **TC-052: Firma Final de Supervisor en Fila 14 tras Completar Todas las Áreas**
+  * *Actor:* Ing. Carlos Supervisor.
+  * *Pasos:* Firmar la Fila 14 habiendo culminado las 13 dependencias anteriores.
+  * *Resultado Esperado:* Estado general cambia a `Firmado` / `Paz y Salvo`, habilitando la emisión oficial.
+
+---
+
+### Módulo 6: Gestión de Rechazos, Novedades y Devolución de Bienes (Casos 53 al 60)
+
+* **TC-053: Registro de Rechazo por Bien Faltante en Almacén**
+  * *Actor:* Lic. Martha Almacén.
+  * *Pasos:* Seleccionar "Rechazar / Registrar Novedad" e ingresar: *"Falta entrega de taladro percutor serial T-500"*.
+  * *Resultado Esperado:* Estado de la solicitud cambia a `Rechazado`.
+
+* **TC-054: Despliegue de Banner Destacado con Motivo de Novedad**
+  * *Actor:* Contratista visualizando su solicitud rechazada.
+  * *Pasos:* Abrir el detalle de la solicitud.
+  * *Resultado Esperado:* Se visualiza banner rojo con la observación de Almacén sobre el taladro faltante.
+
+* **TC-055: Imposición de Marca de Agua de Rechazo en Vista del Certificado**
+  * *Actor:* Cualquier usuario visualizando el formato en estado rechazado.
+  * *Pasos:* Abrir la vista del formato GCCON-F-088.
+  * *Resultado Esperado:* Marca de agua diagonal visible: `"SOLICITUD RECHAZADA - NO VÁLIDO"`.
+
+* **TC-056: Retención Preventiva de la Firma del Contratista en Rechazo**
+  * *Actor:* Sistema.
+  * *Pasos:* Verificar vigencia del paz y salvo en estado rechazado.
+  * *Resultado Esperado:* El paz y salvo no tiene validez legal mientras persista el rechazo.
+
+* **TC-057: Subsanación de la Novedad y Aprobación del Área**
+  * *Actor:* Lic. Martha Almacén.
+  * *Pasos:* Una vez devuelto el elemento, firmar la casilla de Almacén.
+  * *Resultado Esperado:* La casilla pasa a `Firmado`.
+
+* **TC-058: Limpieza Automática de Residuos de Novedades tras Subsanación**
+  * *Actor:* Sistema al completarse todas las firmas.
+  * *Pasos:* Consultar la solicitud con todas las firmas completas.
+  * *Resultado Esperado:* El banner de rechazo y la marca de agua desaparecen por completo.
+
+* **TC-059: Historial de Auditoría de Rechazo Registrado en Base de Datos**
+  * *Actor:* Sistema de auditoría (`auditoria_eventos`).
+  * *Pasos:* Consultar historial de eventos.
+  * *Resultado Esperado:* Registro que almacena fecha, usuario que rechazó, motivo y estado previo.
+
+* **TC-060: Rechazo por Parte del Supervisor por Inconsistencias Contractuales**
+  * *Actor:* Supervisor.
+  * *Pasos:* Rechazar la solicitud en la etapa final con justificación técnica.
+  * *Resultado Esperado:* La solicitud regresa a estado `Rechazado` para subsanación del contratista.
+
+---
+
+### Módulo 7: Administración de Usuarios, Dependencias y Certificación PDF (Casos 61 al 70)
+
+* **TC-061: Creación Exitosa de Usuario con Contraseña Robusta**
+  * *Actor:* Administrador General.
+  * *Pasos:* Registrar usuario con clave `Sena2026*` (8+ caracteres, mayúscula, minúscula y número).
+  * *Resultado Esperado:* HTTP 201, usuario guardado en MongoDB Atlas y reflejado en la tabla.
+
+* **TC-062: Bloqueo de Creación de Usuario con Contraseña Débil**
+  * *Actor:* Administrador General.
+  * *Pasos:* Intentar registrar usuario con clave corta `abc12`.
+  * *Resultado Esperado:* El formulario advierte los requisitos y bloquea el botón "Guardar".
+
+* **TC-063: Bloqueo de Registro por Correo Institucional Duplicado**
+  * *Actor:* Administrador General.
+  * *Pasos:* Intentar crear usuario con correo `admin@gccon.com`.
+  * *Resultado Esperado:* HTTP 400 *"El correo institucional o documento ya está registrado"*.
+
+* **TC-064: Bloqueo de Registro por Documento de Identidad Duplicado**
+  * *Actor:* Administrador General.
+  * *Pasos:* Intentar crear usuario con cédula existente `1095000001`.
+  * *Resultado Esperado:* Notificación: *"Ya existe un usuario registrado con ese documento"*.
+
+* **TC-065: Desactivación de Dependencia con Confirmación Humanizada**
+  * *Actor:* Administrador General.
+  * *Pasos:* Desactivar la dependencia "Gestión de TIC".
+  * *Resultado Esperado:* El diálogo de confirmación muestra el texto claro: *"¿Está seguro de desactivar la dependencia Gestión de TIC?"* sin códigos crudos.
+
+* **TC-066: Expulsión en Tiempo Real de Usuario Deshabilitado (Flujo 7)**
+  * *Actor:* Administrador deshabilitando a un usuario (`activo: false`).
+  * *Pasos:* El usuario deshabilitado intenta realizar una acción con su token activo.
+  * *Resultado Esperado:* El backend valida en base de datos y responde HTTP 401 *"Usuario deshabilitado"*.
+
+* **TC-067: Edición de Datos de Contratista desde el Panel Administrativo**
+  * *Actor:* Administrador General.
+  * *Pasos:* Modificar el teléfono y nombre de un contratista y guardar.
+  * *Resultado Esperado:* Actualización confirmada con notificación verde y persistencia en base de datos.
+
+* **TC-068: Modal de Edición de Metadatos del Certificado GCCON-F-088**
+  * *Actor:* Supervisor o Administrador.
+  * *Pasos:* Abrir modal de metadatos y actualizar causal de terminación (ej. *"Terminación Normal"*).
+  * *Resultado Esperado:* Los metadatos se reflejan en la vista previa del certificado.
+
+* **TC-069: Fidelidad Gráfica y Estructural del Formato GCCON-F-088**
+  * *Actor:* Cualquier usuario visualizando el paz y salvo emitido.
+  * *Pasos:* Revisar la cabecera y estructura del documento en pantalla.
+  * *Resultado Esperado:* Presenta el logotipo SENA, código GCCON-F-088, versión oficial 1, tabla de clasificación de información y cuadrícula de 14 filas.
+
+* **TC-070: Generación y Descarga del Documento Oficial en PDF**
+  * *Actor:* Contratista o Supervisor con solicitud aprobada.
+  * *Pasos:* Hacer clic en "Descargar Paz y Salvo (PDF)".
+  * *Resultado Esperado:* Descarga de archivo `.pdf` en formato Carta con alta resolución, 14 firmas estampadas y datos contractuales fidedignos.
+
+---
+
+## 5. Tabla de Mapeo Rápido para Ejecutores Automatizados de API
+
+| Rango de Pruebas | Método | Endpoint Backend | Rol Requerido | Código HTTP Esperado |
+|:---:|:---:|:---|:---:|:---:|
+| `TC-001` - `TC-006` | `POST` | `/api/auth/login` | Público | `200 OK` / `401` / `403` |
+| `TC-007` - `TC-008` | `POST` | `/api/auth/recuperar` | Público | `200 OK` |
+| `TC-009` | `POST` | `/api/auth/restablecer` | Público | `400 Bad Request` |
+| `TC-011` - `TC-020` | `GET` | `/api/usuarios` | `ADMINISTRADOR` | `200 OK` / `403 Forbidden` |
+| `TC-021` - `TC-028` | `GET` | `/api/contratos` | Filtrado por rol | `200 OK` |
+| `TC-029` - `TC-038` | `POST` | `/api/contratos` | `CONTRATISTA` | `201 Created` |
+| `TC-039` - `TC-052` | `POST` | `/api/firmas` | `RESPONSABLE_AREA` | `200 OK` / `403 Forbidden` |
+| `TC-053` - `TC-060` | `PATCH`| `/api/contratos/:id/estado` | `RESPONSABLE_AREA` / `SUPER` | `200 OK` |
+| `TC-061` - `TC-064` | `POST` | `/api/usuarios` | `ADMINISTRADOR` | `201 Created` / `400 Bad Request` |
+| `TC-065` - `TC-066` | `PATCH`| `/api/usuarios/estado/:id` | `ADMINISTRADOR` | `200 OK` |
+| `TC-067` - `TC-070` | `GET` | `/api/contratos/:id/pdf` | Autenticado | `200 OK` (`application/pdf`) |
+
+---
+
+## 6. Criterios de Aceptación Global para TestSprite
+
+1. **Total de Casos Formalizados:** Exactamente 70 casos de prueba independientes (`TC-001` a `TC-070`).
+2. **Garantía de Meta:** Incluso si la IA consolida algunos escenarios, la suite generará y ejecutará ampliamente más de las 50 pruebas exigidas ($\approx 55\text{ a }65$ pruebas efectivas).
+3. **Tasa de Aprobación Esperada:** $\ge 98\%$.
+4. **Respuesta Máxima de API:** Menor a $500\text{ ms}$ en condiciones estándar de red.
