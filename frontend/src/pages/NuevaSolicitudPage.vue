@@ -189,9 +189,29 @@
               </template>
             </q-select>
 
+            <!-- Plantilla de Formato GCCON-F-088 -->
+            <div class="text-subtitle1 text-weight-bold text-grey-8 border-bottom q-pb-xs q-mt-lg">
+              3. Plantilla de Dependencias (GCCON-F-088)
+            </div>
+
+            <q-select
+              v-model="form.plantillaTipo"
+              outlined
+              dense
+              label="Plantilla de Firmas y Dependencias *"
+              :options="opcionesPlantillas"
+              emit-value
+              map-options
+              hint="Define qué dependencias firman de acuerdo al tipo de contrato (las no aplicables se marcan como N/A)"
+            >
+              <template #prepend>
+                <q-icon name="tune" color="primary" />
+              </template>
+            </q-select>
+
             <!-- Documentos adjuntos -->
             <div class="text-subtitle1 text-weight-bold text-grey-8 border-bottom q-pb-xs q-mt-lg">
-              3. Soportes Requeridos
+              4. Soportes Requeridos
             </div>
 
             <q-file
@@ -254,8 +274,24 @@ const form = ref({
   fechaInicio: '',
   fechaFin: '',
   supervisor: null,
+  plantillaTipo: 'COMPLETA',
   adjunto: null,
 })
+
+const opcionesPlantillas = ref([
+  {
+    label: 'Plantilla Completa Institucional (14 Dependencias SENA)',
+    value: 'COMPLETA',
+  },
+  {
+    label: 'Prestación de Servicios Profesionales / Apoyo a la Gestión (7 Dependencias)',
+    value: 'SERVICIOS_PROFESIONALES',
+  },
+  {
+    label: 'Instructores y Formación Profesional (7 Dependencias)',
+    value: 'INSTRUCTORES',
+  },
+])
 
 function alCambiarVigencia(nuevoAnio) {
   form.value.vigencia = String(nuevoAnio)
@@ -399,6 +435,7 @@ async function guardarSolicitud() {
     fechaFin: form.value.fechaFin,
     fecha: form.value.fechaInicio || new Date().toISOString().split('T')[0],
     fechaContrato: form.value.fechaInicio || new Date().toISOString().split('T')[0],
+    plantillaTipo: form.value.plantillaTipo || 'COMPLETA',
     estado: 'En revisión',
   }
 
@@ -412,6 +449,8 @@ async function guardarSolicitud() {
   localStorage.setItem(`certificado_datos_${numContrato}`, JSON.stringify(nuevaSolicitud))
   localStorage.setItem(`certificado_datos_${numContrato.toLowerCase()}`, JSON.stringify(nuevaSolicitud))
   localStorage.setItem(`certificado_datos_${nomContratista.toLowerCase()}`, JSON.stringify(nuevaSolicitud))
+  localStorage.setItem(`plantilla_tipo_${numContrato}`, form.value.plantillaTipo || 'COMPLETA')
+  localStorage.setItem(`plantilla_tipo_${numContrato.toLowerCase()}`, form.value.plantillaTipo || 'COMPLETA')
   if (docContratista) {
     localStorage.setItem(`certificado_datos_${docContratista}`, JSON.stringify(nuevaSolicitud))
   }
