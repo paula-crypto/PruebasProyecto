@@ -16,7 +16,18 @@ function normalizarRol(valor) {
 
 export const useAuthStore = defineStore('auth', () => {
   // Usuario autenticado en sesión
-  const usuario = ref(JSON.parse(localStorage.getItem('gccon_user') || 'null'))
+  const usuarioGuardado = JSON.parse(localStorage.getItem('gccon_user') || 'null')
+  if (
+    usuarioGuardado &&
+    (usuarioGuardado.correo === 'responsable@gccon.com' || usuarioGuardado.correo === 'franklin.chacon@sena.edu.co') &&
+    (usuarioGuardado.nombre?.includes('Ana María') || usuarioGuardado.nombre?.includes('Gómez'))
+  ) {
+    usuarioGuardado.nombre = 'Franklin Rolando Chacon Lopez'
+    usuarioGuardado.cargo = 'Responsable de Gestión de TIC'
+    usuarioGuardado.dependencia = 'Gestión de TIC'
+    localStorage.setItem('gccon_user', JSON.stringify(usuarioGuardado))
+  }
+  const usuario = ref(usuarioGuardado)
 
   // Lista de usuarios de prueba según la jerarquía del sistema
   const usuariosPrueba = ref([
@@ -259,11 +270,11 @@ export const useAuthStore = defineStore('auth', () => {
     },
     {
       id: 25,
-      nombre: 'Dra. Ana María Gómez',
+      nombre: 'Franklin Rolando Chacon Lopez',
       correo: 'responsable@gccon.com',
       password: '123',
       rol: 'RESPONSABLE_AREA',
-      cargo: 'Responsable de Sistemas e Informática',
+      cargo: 'Responsable de Gestión de TIC',
       dependencia: 'Gestión de TIC',
     },
   ])

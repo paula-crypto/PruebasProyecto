@@ -1481,8 +1481,8 @@ function puedeFirmarFila(fila) {
     }
   }
 
-  // 4. Solo RESPONSABLE_AREA (o Supervisor en fila 14/3) puede firmar dependencias
-  if (!esResponsableArea.value && rol !== 'SUPERVISOR') {
+  // 4. Solo RESPONSABLE_AREA puede firmar dependencias (filas 1 a 13)
+  if (!esResponsableArea.value) {
     return false
   }
 
@@ -1602,8 +1602,7 @@ function puedeFirmarFila(fila) {
     if (
       fila.id === 1 &&
       (depUsuario.includes('tic') ||
-        depUsuario.includes('tecnol') ||
-        depUsuario.includes('sistema'))
+        depUsuario.includes('tecnol'))
     )
       return true
     if (fila.id === 2 && (depUsuario.includes('document') || depUsuario.includes('archivo')))

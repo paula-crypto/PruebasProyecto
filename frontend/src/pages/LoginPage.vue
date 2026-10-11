@@ -144,7 +144,7 @@ const opcionesRoles = [
     correo: 'responsable@gccon.com',
     pass: '123',
     icon: 'draw',
-    descripcion: 'Aprobación y firma electrónica',
+    descripcion: 'Gestión de TIC — Franklin Rolando Chacón',
   },
 ]
 
