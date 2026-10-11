@@ -1,64 +1,43 @@
 <template>
   <q-page class="page-formato">
     <div class="toolbar no-print">
-      <!-- Lado Izquierdo: Volver + Estado de la Solicitud -->
-      <div class="toolbar-left row items-center q-gutter-sm no-wrap">
+      <!-- Lado Izquierdo: Volver -->
+      <div class="toolbar-left row items-center">
         <q-btn
           flat
           dense
           color="grey-9"
           icon="arrow_back"
           label="Volver"
-          class="text-weight-bold"
+          class="text-weight-bold q-px-sm"
           @click="volver"
         />
-        <q-separator vertical inset class="q-mx-xs" />
         <q-chip
           v-if="datosSolicitud.estado === 'Rechazado'"
           dense
           color="red-1"
           text-color="negative"
           icon="cancel"
-          class="text-weight-bold q-px-sm"
+          class="text-weight-bold q-px-sm q-ml-sm"
         >
-          Solicitud Rechazada
-        </q-chip>
-        <q-chip
-          v-else-if="datosSolicitud.estado === 'Firmado' || datosSolicitud.estado === 'Finalizado'"
-          dense
-          color="green-1"
-          text-color="positive"
-          icon="check_circle"
-          class="text-weight-bold q-px-sm"
-        >
-          Paz y Salvo Vigente
-        </q-chip>
-        <q-chip
-          v-else
-          dense
-          color="amber-1"
-          text-color="brown-9"
-          icon="schedule"
-          class="text-weight-bold q-px-sm"
-        >
-          En Revisión
+          Rechazado
         </q-chip>
       </div>
 
-      <!-- Lado Derecho: Acciones principales con estilo homogéneo en una sola fila -->
-      <div class="toolbar-right row items-center q-gutter-sm no-wrap">
+      <!-- Lado Derecho: Acciones principales con estilo homogéneo, espaciadas y legibles -->
+      <div class="toolbar-right row items-center q-gutter-md no-wrap">
         <q-btn
           v-if="
             miFilaParaFirmar &&
             datosSolicitud.estado !== 'Rechazado' &&
             !firmasTabla[miFilaParaFirmar.id]
           "
-          outline
+          unelevated
           dense
-          color="primary"
+          color="blue-8"
           icon="history_edu"
           :label="'Firmar ' + (miFilaParaFirmar.id === 14 ? 'Supervisión' : 'Mi Área')"
-          class="q-px-sm"
+          class="q-px-md text-weight-bold"
           @click="abrirModalFirmaFila(miFilaParaFirmar)"
         >
           <q-tooltip
@@ -81,39 +60,45 @@
         >
           <q-tooltip>Borrar firma de mi área</q-tooltip>
         </q-btn>
+
+        <!-- Botón Plantilla y Firmantes: Alta visibilidad, color sólido profesional SENA -->
         <q-btn
-          outline
+          unelevated
           dense
-          color="secondary"
+          color="teal-8"
           icon="tune"
           label="Plantilla y Firmantes"
-          class="q-px-sm"
+          class="q-px-md text-weight-bold shadow-1"
           @click="abrirModalPlantillaFirmas"
         >
           <q-tooltip
             >Configurar qué dependencias aplican para este contrato y asignar sus firmantes autorizados</q-tooltip
           >
         </q-btn>
+
+        <!-- Botón Editar Formato -->
         <q-btn
           outline
           dense
           color="primary"
           icon="edit_note"
           label="Editar Formato"
-          class="q-px-sm"
+          class="q-px-md text-weight-bold"
           @click="abrirModalEditarDatos"
         >
           <q-tooltip
             >Modificar o completar datos del contratista, contrato, regional y causal</q-tooltip
           >
         </q-btn>
+
+        <!-- Botón Imprimir -->
         <q-btn
           unelevated
           dense
           :color="datosSolicitud.estado === 'Rechazado' ? 'grey-8' : 'positive'"
           icon="print"
           :label="datosSolicitud.estado === 'Rechazado' ? 'Imprimir Borrador' : 'Imprimir'"
-          class="q-px-md text-weight-bold"
+          class="q-px-lg text-weight-bold shadow-1"
           @click="imprimir"
         >
           <q-tooltip>Imprimir o guardar como PDF oficial</q-tooltip>
@@ -701,7 +686,7 @@
     <!-- Diálogo para Seleccionar Plantilla y Asignar Firmantes por Dependencia (GCCON-F-088) -->
     <q-dialog v-model="dialogoPlantillaFirmas" persistent>
       <q-card style="min-width: 820px; max-width: 95vw; border-radius: 12px">
-        <q-card-section class="bg-secondary text-white row items-center justify-between q-py-md">
+        <q-card-section class="bg-teal-8 text-white row items-center justify-between q-py-md">
           <div>
             <div class="text-h6 text-weight-bold">
               <q-icon name="tune" class="q-mr-sm" />
@@ -745,7 +730,7 @@
                   <q-radio
                     v-model="plantillaSeleccionada"
                     :val="k"
-                    color="secondary"
+                    color="teal-8"
                     dense
                     class="q-mr-sm"
                     @update:model-value="seleccionarPlantilla(k)"
@@ -806,7 +791,7 @@
               <div class="col-12 col-sm-4 q-pr-sm">
                 <div class="row items-center no-wrap">
                   <q-badge
-                    :color="fila.aplica ? 'secondary' : 'grey-6'"
+                    :color="fila.aplica ? 'teal-8' : 'grey-6'"
                     :label="fila.aplica ? fila.id + ' [X]' : fila.id + ' [N/A]'"
                     class="q-mr-xs text-weight-bold"
                   />
@@ -875,7 +860,7 @@
                     hint="Puede seleccionar cualquiera de los autorizados o ambas personas"
                   >
                     <template #prepend>
-                      <q-icon name="local_library" color="secondary" />
+                      <q-icon name="local_library" color="teal-8" />
                     </template>
                   </q-select>
 
@@ -923,7 +908,7 @@
             unelevated
             icon="save"
             label="Guardar y Aplicar Plantilla"
-            color="secondary"
+            color="teal-8"
             @click="guardarPlantillaFirmas"
           />
         </q-card-actions>
