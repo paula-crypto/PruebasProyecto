@@ -624,6 +624,24 @@
             </div>
           </div>
 
+          <!-- Supervisor Asignado al Contrato (Fila 14 y Fila 3) -->
+          <div class="q-mb-md">
+            <q-select
+              v-model="formularioEdicion.responsable"
+              :options="opcionesFirmantesSupervisor"
+              label="Supervisor Asignado al Contrato *"
+              outlined
+              dense
+              use-input
+              new-value-mode="add-unique"
+              hint="Supervisor responsable de este contrato que firmará la fila 14 y la fila 3 del formato oficial"
+            >
+              <template #prepend>
+                <q-icon name="engineering" color="primary" />
+              </template>
+            </q-select>
+          </div>
+
           <q-separator class="q-my-md" />
 
           <!-- Causal de Terminación del Contrato -->
@@ -1131,20 +1149,24 @@ const opcionesFirmantesNovedades = [
   'Eileen Erlensi Hurtado Ariza',
 ]
 
-function sincronizarSupervisorConFilas() {
+function sincronizarSupervisorConFilas(forzar = false) {
   const supReal =
     datosSolicitud.value.responsable ||
-    auth.usuario?.nombre ||
+    (auth.rolUsuario === 'SUPERVISOR' ? auth.usuario?.nombre : null) ||
     'Ing. Carlos Supervisor'
 
   const f14 = filasDependencias.value.find((f) => f.id === 14)
-  if (f14 && (!f14.nombres || f14.nombres === 'Johon Fredy Sanabria Muñoz')) {
-    f14.nombres = supReal
+  if (f14) {
+    if (forzar || !f14.nombres || f14.nombres === 'Johon Fredy Sanabria Muñoz' || f14.nombres === 'Ing. Carlos Supervisor') {
+      f14.nombres = supReal
+    }
   }
 
   const f3 = filasDependencias.value.find((f) => f.id === 3)
-  if (f3 && (!f3.nombres || f3.nombres === 'Johon Fredy Sanabria Muñoz')) {
-    f3.nombres = supReal
+  if (f3) {
+    if (forzar || !f3.nombres || f3.nombres === 'Johon Fredy Sanabria Muñoz' || f3.nombres === 'Ing. Carlos Supervisor') {
+      f3.nombres = supReal
+    }
   }
 }
 
@@ -1754,6 +1776,7 @@ const formularioEdicion = ref({
   fechaContrato: '',
   causalTerminacion: 'LIQUIDACION_MUTUO_ACUERDO',
   clasificacion: 'Publica',
+  responsable: 'Ing. Carlos Supervisor',
 })
 
 function abrirModalEditarDatos() {
@@ -1790,6 +1813,7 @@ function abrirModalEditarDatos() {
     fechaContrato: datosSolicitud.value.fechaContrato || '',
     causalTerminacion: datosSolicitud.value.causalTerminacion || 'LIQUIDACION_MUTUO_ACUERDO',
     clasificacion: datosSolicitud.value.clasificacion || 'Publica',
+    responsable: datosSolicitud.value.responsable || 'Ing. Carlos Supervisor',
   }
   ciudadesFiltradas.value = [...listaCiudadesSantander]
   dialogoEditarDatos.value = true
