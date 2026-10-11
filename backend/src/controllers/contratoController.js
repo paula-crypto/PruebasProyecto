@@ -274,6 +274,9 @@ exports.listarContratos = asyncHandler(async (req, res) => {
         obj.documento_contratista = docResuelto;
         obj.identificacion = docResuelto;
         obj.documento = docResuelto;
+        obj.ciudad = c.ciudad || 'San Gil';
+        obj.regional = c.regional || 'Santander';
+        obj.direccion = c.direccion || c.dependencia?.nombre_dependencia || 'Gestión Tecnológica (TIC)';
         obj.bienes = todosBienes.filter(b => String(b.contrato_id) === String(c._id));
         obj.firmas = trazabilidades.filter(t => String(t.contrato_id) === String(c._id));
         return obj;
@@ -339,13 +342,16 @@ exports.actualizarContrato = asyncHandler(async (req, res) => {
         }
     }
 
-    const { numero, numero_contrato, telefono, dependencia, contratista, nombre_contratista, estado, observaciones_supervisor, observacion_rechazo, observacionRechazo, motivo, documento_contratista, identificacion, documento } = req.body;
+    const { numero, numero_contrato, telefono, dependencia, contratista, nombre_contratista, estado, observaciones_supervisor, observacion_rechazo, observacionRechazo, motivo, documento_contratista, identificacion, documento, ciudad, regional, direccion } = req.body;
     if (numero !== undefined) contrato.numero_contrato = numero;
     if (numero_contrato !== undefined) contrato.numero_contrato = numero_contrato;
     if (telefono !== undefined) contrato.telefono = telefono;
     if (contratista !== undefined) contrato.nombre_contratista = contratista;
     if (nombre_contratista !== undefined) contrato.nombre_contratista = nombre_contratista;
     if (estado !== undefined) contrato.estado = estado;
+    if (ciudad !== undefined) contrato.ciudad = ciudad;
+    if (regional !== undefined) contrato.regional = regional;
+    if (direccion !== undefined) contrato.direccion = direccion;
     const docActualizar = documento_contratista || identificacion || documento;
     if (docActualizar !== undefined) contrato.documento_contratista = docActualizar;
 

@@ -262,6 +262,9 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
                         est === 'Firmado' || est === 'Finalizado' ? 'Devuelto' : 'Pendiente',
                     },
                   ],
+            ciudad: c.ciudad || 'San Gil',
+            regional: c.regional || 'Santander',
+            direccion: c.direccion || dep,
             firmas: [
               {
                 dependenciaCodigo: 'DEP-01',
@@ -273,16 +276,65 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
           }
         })
 
-        const mapa = new Map()
-        desdeAtlas.forEach((s) => mapa.set((s.numeroContrato || s.id).toLowerCase(), s))
-        // Preservar contratos en memoria sólo si no existen en Atlas
+        const mapaPorId = new Map()
+        const mapaPorContrato = new Map()
+        const mapaPorSolicitud = new Map()
+
+        desdeAtlas.forEach((s) => {
+          if (s._id) mapaPorId.set(String(s._id).toLowerCase(), s)
+          if (s.numeroContrato) mapaPorContrato.set(String(s.numeroContrato).toLowerCase().trim(), s)
+          if (s.numeroSolicitud) mapaPorSolicitud.set(String(s.numeroSolicitud).toLowerCase().trim(), s)
+        })
+
+        // Sincronizar elementos que estuvieran en memoria para no duplicar jamás
         solicitudes.value.forEach((s) => {
-          const key = (s.numeroContrato || s.numeroSolicitud || s.id || '').toLowerCase()
-          if (key && !mapa.has(key)) {
-            mapa.set(key, s)
+          const idKey = s._id ? String(s._id).toLowerCase() : null
+          const solKey = s.numeroSolicitud ? String(s.numeroSolicitud).toLowerCase().trim() : null
+          const numKey = s.numeroContrato ? String(s.numeroContrato).toLowerCase().trim() : null
+
+          let existente = null
+          if (idKey && mapaPorId.has(idKey)) existente = mapaPorId.get(idKey)
+          else if (solKey && mapaPorSolicitud.has(solKey)) existente = mapaPorSolicitud.get(solKey)
+          else if (numKey && mapaPorContrato.has(numKey)) existente = mapaPorContrato.get(numKey)
+
+          if (existente) {
+            // No duplicar: transferir cambios editados localmente al objeto canónico
+            if (s.ciudad && s.ciudad !== 'Ibagué') existente.ciudad = s.ciudad
+            if (s.direccion) existente.direccion = s.direccion
+            if (s.regional && s.regional !== 'Tolima') existente.regional = s.regional
+            if (s.identificacion && s.identificacion !== '—') existente.identificacion = s.identificacion
           }
         })
-        solicitudes.value = Array.from(mapa.values())
+
+        // La lista canónica sin duplicados: primero Atlas, luego solo locales no colisionantes
+        const clavesRegistradas = new Set()
+        const listaUnica = []
+
+        for (const s of desdeAtlas) {
+          const sol = String(s.numeroSolicitud || '').toLowerCase().trim()
+          const num = String(s.numeroContrato || '').toLowerCase().trim()
+          const id = String(s._id || '').toLowerCase().trim()
+          if (!clavesRegistradas.has(sol) && !clavesRegistradas.has(id)) {
+            if (sol) clavesRegistradas.add(sol)
+            if (id) clavesRegistradas.add(id)
+            if (num) clavesRegistradas.add(num)
+            listaUnica.push(s)
+          }
+        }
+
+        for (const s of solicitudes.value) {
+          const sol = String(s.numeroSolicitud || '').toLowerCase().trim()
+          const num = String(s.numeroContrato || '').toLowerCase().trim()
+          const id = String(s._id || '').toLowerCase().trim()
+          if (!clavesRegistradas.has(sol) && (!id || !clavesRegistradas.has(id)) && (!num || !clavesRegistradas.has(num))) {
+            if (sol) clavesRegistradas.add(sol)
+            if (id) clavesRegistradas.add(id)
+            if (num) clavesRegistradas.add(num)
+            listaUnica.push(s)
+          }
+        }
+
+        solicitudes.value = listaUnica
       }
     } catch (err) {
       console.warn('Cargando solicitudes locales:', err.message)
@@ -409,11 +461,15 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
           identificacion: item.identificacion || item.documentoContratista || '',
           dependencia: item.dependencia,
           estado: item.estado,
+          ciudad: item.ciudad || datosActualizados.ciudad,
+          regional: item.regional || datosActualizados.regional,
+          direccion: item.direccion || datosActualizados.direccion,
           observaciones_supervisor: motivo,
           observacion_rechazo: motivo,
           observacionRechazo: motivo,
           motivo: motivo,
         })
+        await cargarSolicitudes()
       } catch (err) {
         console.warn('Sincronización con backend falló, mantenido localmente:', err.message)
       }

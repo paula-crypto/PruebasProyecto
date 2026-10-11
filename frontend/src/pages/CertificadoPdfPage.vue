@@ -1333,11 +1333,29 @@ function guardarDatosFormato() {
       item.fecha = datosSolicitud.value.fecha
       item.regional = datosSolicitud.value.regional
       item.direccion = datosSolicitud.value.direccion
-      item.dependencia = datosSolicitud.value.direccion
+      if (!item.dependencia) {
+        item.dependencia = datosSolicitud.value.direccion
+      }
       item.numeroContrato = datosSolicitud.value.numeroContrato
       item.fechaContrato = datosSolicitud.value.fechaContrato
       item.causalTerminacion = datosSolicitud.value.causalTerminacion
       item.clasificacion = datosSolicitud.value.clasificacion
+
+      if (typeof store.actualizarSolicitud === 'function') {
+        store.actualizarSolicitud(item._id || item.numeroContrato || codigo, {
+          contratista: item.contratista,
+          identificacion: item.identificacion,
+          documento_contratista: item.identificacion,
+          ciudad: item.ciudad,
+          regional: item.regional,
+          direccion: item.direccion,
+          numeroContrato: item.numeroContrato,
+          numero_contrato: item.numeroContrato,
+          fechaContrato: item.fechaContrato,
+          causalTerminacion: item.causalTerminacion,
+          clasificacion: item.clasificacion,
+        }).catch((e) => console.warn('Error al sincronizar datos desde certificado con backend:', e))
+      }
     }
   }
 

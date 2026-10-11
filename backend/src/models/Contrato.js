@@ -54,6 +54,21 @@ const contratoSchema = new mongoose.Schema({
     version_formato: {
         type: Number,
         default: 1
+    },
+    ciudad: {
+        type: String,
+        trim: true,
+        default: 'San Gil'
+    },
+    regional: {
+        type: String,
+        trim: true,
+        default: 'Santander'
+    },
+    direccion: {
+        type: String,
+        trim: true,
+        default: 'Gestión Tecnológica (TIC)'
     }
 }, {
     timestamps: true,
