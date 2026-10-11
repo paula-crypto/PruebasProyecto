@@ -86,8 +86,9 @@
           <q-tooltip>Borrar firma del contratista</q-tooltip>
         </q-btn>
 
-        <!-- Botón Plantilla y Firmantes: Alta visibilidad, color sólido profesional SENA -->
+        <!-- Botón Plantilla y Firmantes: Alta visibilidad, exclusivo para Supervisor y Admin -->
         <q-btn
+          v-if="!esContratista"
           unelevated
           dense
           color="teal-8"
@@ -658,8 +659,14 @@
               outlined
               dense
               use-input
+              :disable="esContratista"
+              :readonly="esContratista"
               new-value-mode="add-unique"
-              hint="Supervisor responsable de este contrato que firmará la fila 14 y la fila 3 del formato oficial"
+              :hint="
+                esContratista
+                  ? 'Supervisor asignado a su contrato (solo puede ser modificado por el Supervisor o Administrador)'
+                  : 'Supervisor responsable de este contrato que firmará la fila 14 y la fila 3 del formato oficial'
+              "
             >
               <template #prepend>
                 <q-icon name="engineering" color="primary" />
@@ -1196,6 +1203,15 @@ function sincronizarSupervisorConFilas(forzar = false) {
 }
 
 function abrirModalPlantillaFirmas() {
+  if (esContratista.value) {
+    $q.notify({
+      type: 'warning',
+      message: 'La configuración de plantilla y firmantes es exclusiva del Supervisor o Administrador.',
+      icon: 'lock',
+    })
+    return
+  }
+
   const codigo = route.query.codigo || route.params.id || datosSolicitud.value.contratista
   const tipoGuardado =
     localStorage.getItem(`plantilla_tipo_${codigo}`) ||
