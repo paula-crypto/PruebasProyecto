@@ -61,6 +61,31 @@
           <q-tooltip>Borrar firma de mi área</q-tooltip>
         </q-btn>
 
+        <!-- Botón Firmar para Contratista (Exclusivo para el Contratista en su recuadro final) -->
+        <q-btn
+          v-if="esContratista && datosSolicitud.estado !== 'Rechazado' && !firmaGuardada"
+          unelevated
+          dense
+          color="positive"
+          icon="draw"
+          label="Firmar como Contratista"
+          class="q-px-md text-weight-bold shadow-1"
+          @click="abrirModalFirma"
+        >
+          <q-tooltip>Estampar la firma del contratista en el certificado</q-tooltip>
+        </q-btn>
+        <q-btn
+          v-if="esContratista && datosSolicitud.estado !== 'Rechazado' && firmaGuardada"
+          flat
+          dense
+          color="grey-7"
+          icon="close"
+          class="q-px-xs"
+          @click="limpiarFirma"
+        >
+          <q-tooltip>Borrar firma del contratista</q-tooltip>
+        </q-btn>
+
         <!-- Botón Plantilla y Firmantes: Alta visibilidad, color sólido profesional SENA -->
         <q-btn
           unelevated
@@ -1348,6 +1373,12 @@ function puedeFirmarFila(fila) {
 
   const rol = (auth.rolUsuario || '').toUpperCase()
 
+  // CONTRATISTA NUNCA PUEDE FIRMAR FILAS DE DEPENDENCIAS (1 al 14) NI SUPERVISIÓN
+  // Su firma es exclusivamente la de abajo ("Firma del Contratista")
+  if (rol === 'CONTRATISTA' || esContratista.value) {
+    return false
+  }
+
   // Administrador tiene permisos para supervisión y firmas
   if (rol === 'ADMIN') return true
 
@@ -1363,22 +1394,23 @@ function puedeFirmarFila(fila) {
     if (rol === 'SUPERVISOR') return true
     if (
       responsableContratoNorm &&
-      (nombreUsuario.includes(responsableContratoNorm) ||
-        responsableContratoNorm.includes(nombreUsuario))
+      nombreUsuario &&
+      (nombreUsuario === responsableContratoNorm ||
+        (nombreUsuario.length >= 6 && responsableContratoNorm.includes(nombreUsuario)) ||
+        (responsableContratoNorm.length >= 6 && nombreUsuario.includes(responsableContratoNorm)))
     ) {
       return true
     }
     if (
       nombresFila &&
-      (nombresFila.includes(nombreUsuario) || nombreUsuario.includes(nombresFila))
+      nombreUsuario &&
+      (nombresFila === nombreUsuario ||
+        (nombreUsuario.length >= 6 && nombresFila.includes(nombreUsuario)) ||
+        (nombresFila.length >= 6 && nombreUsuario.includes(nombresFila)))
     ) {
       return true
     }
-    if (
-      correoUsuario.includes('supervisor') ||
-      correoUsuario.includes('carlos') ||
-      correoUsuario.includes('sanabria')
-    ) {
+    if (correoUsuario.includes('supervisor')) {
       return true
     }
   }
@@ -1388,22 +1420,25 @@ function puedeFirmarFila(fila) {
     if (rol === 'SUPERVISOR') return true
     if (
       responsableContratoNorm &&
-      (nombreUsuario.includes(responsableContratoNorm) ||
-        responsableContratoNorm.includes(nombreUsuario))
+      nombreUsuario &&
+      (nombreUsuario === responsableContratoNorm ||
+        (nombreUsuario.length >= 6 && responsableContratoNorm.includes(nombreUsuario)) ||
+        (responsableContratoNorm.length >= 6 && nombreUsuario.includes(responsableContratoNorm)))
     ) {
       return true
     }
     if (
       nombresFila &&
-      (nombresFila.includes(nombreUsuario) || nombreUsuario.includes(nombresFila))
+      nombreUsuario &&
+      (nombresFila === nombreUsuario ||
+        (nombreUsuario.length >= 6 && nombresFila.includes(nombreUsuario)) ||
+        (nombresFila.length >= 6 && nombreUsuario.includes(nombresFila)))
     ) {
       return true
     }
     if (
       correoUsuario.includes('secretaria') ||
-      correoUsuario.includes('carne') ||
-      correoUsuario.includes('carlos') ||
-      correoUsuario.includes('sanabria')
+      correoUsuario.includes('carne')
     ) {
       return true
     }
@@ -1619,6 +1654,19 @@ function limpiarMiFirma() {
       message: 'Firma de tu área removida.',
     })
   }
+}
+
+function limpiarFirma() {
+  firmaGuardada.value = null
+  const codigo = route.query.codigo || route.params.id
+  if (codigo) {
+    localStorage.removeItem(`firma_${codigo}`)
+  }
+  localStorage.removeItem('ultima_firma')
+  $q.notify({
+    type: 'info',
+    message: 'Firma de contratista removida.',
+  })
 }
 
 function abrirModalFirmaFila(fila) {
