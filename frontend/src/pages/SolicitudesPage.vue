@@ -240,19 +240,38 @@
               </template>
             </q-select>
 
-            <!-- Número de Contrato (Vinculado al contratista seleccionado) -->
-            <q-input
-              outlined
-              dense
-              v-model="solicitud.numeroContrato"
-              label="Número de Contrato *"
-              :rules="[(val) => !!val || 'El número de contrato es obligatorio']"
-              hint="Contrato oficial asignado al contratista por la supervisión"
-            >
-              <template #prepend>
-                <q-icon name="description" color="primary" />
-              </template>
-            </q-input>
+            <div class="row q-col-gutter-sm">
+              <div class="col-12 col-sm-6">
+                <!-- Identificación del Contratista -->
+                <q-input
+                  outlined
+                  dense
+                  v-model="solicitud.identificacion"
+                  label="Identificación / Cédula *"
+                  hint="Cédula requerida para GCCON-F-088"
+                  :rules="[(val) => !!val || 'La identificación es obligatoria']"
+                >
+                  <template #prepend>
+                    <q-icon name="badge" color="primary" />
+                  </template>
+                </q-input>
+              </div>
+              <div class="col-12 col-sm-6">
+                <!-- Número de Contrato (Varía por año/vigencia) -->
+                <q-input
+                  outlined
+                  dense
+                  v-model="solicitud.numeroContrato"
+                  label="Número de Contrato (por año) *"
+                  :rules="[(val) => !!val || 'El número de contrato es obligatorio']"
+                  hint="Ej. CNT-2026-014 (varía por año)"
+                >
+                  <template #prepend>
+                    <q-icon name="description" color="primary" />
+                  </template>
+                </q-input>
+              </div>
+            </div>
 
             <!-- Dependencia -->
             <q-select
@@ -747,6 +766,8 @@ const solicitud = ref({
   numeroSolicitud: '',
   numeroContrato: '',
   contratista: '',
+  identificacion: '',
+  documentoContratista: '',
   dependencia: '',
   responsable: '',
   fecha: new Date().toISOString().substring(0, 10),
@@ -952,6 +973,12 @@ function verCertificado(fila) {
     localStorage.setItem(`certificado_datos_${codigo}`, JSON.stringify(datosParaPdf))
     if (datosParaPdf.identificacion) {
       localStorage.setItem(`certificado_identificacion_${codigo}`, datosParaPdf.identificacion)
+      localStorage.setItem(`certificado_identificacion_${String(codigo).toLowerCase().trim()}`, datosParaPdf.identificacion)
+      if (numCon) {
+        localStorage.setItem(`certificado_identificacion_${numCon}`, datosParaPdf.identificacion)
+        localStorage.setItem(`certificado_identificacion_${numCon.toLowerCase().trim()}`, datosParaPdf.identificacion)
+      }
+      localStorage.setItem(`certificado_identificacion_${datosParaPdf.identificacion.trim()}`, datosParaPdf.identificacion)
     }
     if (fila.contratista) {
       localStorage.setItem(
@@ -983,6 +1010,27 @@ async function guardarSolicitud() {
   if (formRef.value) {
     const esValido = await formRef.value.validate()
     if (!esValido) return
+  }
+
+  const iden = (solicitud.value.identificacion || solicitud.value.documentoContratista || '').trim()
+  const numCon = (solicitud.value.numeroContrato || '').trim()
+  const nomCon = (solicitud.value.contratista || '').trim()
+
+  if (iden) {
+    solicitud.value.identificacion = iden
+    solicitud.value.documentoContratista = iden
+    solicitud.value.documento = iden
+    if (numCon) {
+      localStorage.setItem(`certificado_identificacion_${numCon}`, iden)
+      localStorage.setItem(`certificado_identificacion_${numCon.toLowerCase()}`, iden)
+    }
+    if (nomCon) {
+      localStorage.setItem(`certificado_identificacion_${nomCon.toLowerCase()}`, iden)
+    }
+    if (solicitud.value.numeroSolicitud) {
+      localStorage.setItem(`certificado_identificacion_${solicitud.value.numeroSolicitud}`, iden)
+    }
+    localStorage.setItem(`certificado_identificacion_${iden}`, iden)
   }
 
   if (editando.value) {
@@ -1158,6 +1206,8 @@ function nuevaSolicitud() {
     if (contratistasStore.contratistas.length > 0) {
       const primerContratista = contratistasStore.contratistas[0]
       solicitud.value.contratista = primerContratista.nombre
+      solicitud.value.identificacion = primerContratista.documento || ''
+      solicitud.value.documentoContratista = primerContratista.documento || ''
       solicitud.value.numeroContrato =
         primerContratista.numeroContrato || `CNT-2026-${randomSuffix}`
       solicitud.value.dependencia = primerContratista.dependencia || 'Gestión Tecnológica (TIC)'
@@ -1187,6 +1237,8 @@ function limpiarFormulario() {
     numeroSolicitud: '',
     numeroContrato: '',
     contratista: '',
+    identificacion: '',
+    documentoContratista: '',
     dependencia: '',
     responsable: '',
     fecha: new Date().toISOString().substring(0, 10),

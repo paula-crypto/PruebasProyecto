@@ -1396,15 +1396,25 @@ const listaNovedadesCertificado = computed(() => {
 })
 
 onMounted(async () => {
-  if (contratistasStore.contratistas.length === 0 && contratistasStore.cargarContratistas) {
-    await contratistasStore.cargarContratistas()
+  if (typeof store.cargarSolicitudes === 'function') {
+    try {
+      await store.cargarSolicitudes()
+    } catch (e) {
+      console.warn('Error al cargar solicitudes en certificado:', e)
+    }
+  }
+  if (contratistasStore.contratistas?.length === 0 && contratistasStore.cargarContratistas) {
+    try {
+      await contratistasStore.cargarContratistas()
+    } catch (e) {
+      console.warn('Error al cargar contratistas en certificado:', e)
+    }
   }
 
   const codigo =
     route.query.codigo ||
     route.params.id ||
-    auth.usuario?.numeroContrato ||
-    auth.usuario?.nombre ||
+    (auth.rolUsuario === 'CONTRATISTA' ? (auth.usuario?.numeroContrato || auth.usuario?.nombre) : '') ||
     ''
   if (codigo) {
     const f = localStorage.getItem(`firma_${codigo}`) || localStorage.getItem('ultima_firma')
@@ -1438,11 +1448,22 @@ onMounted(async () => {
     let encontrada = null
     if (typeof store.obtenerPorCodigo === 'function') {
       encontrada = store.obtenerPorCodigo(codigo)
-    } else if (Array.isArray(store.solicitudes)) {
+    }
+    if (!encontrada && Array.isArray(store.solicitudes)) {
+      const codMin = String(codigo).trim().toLowerCase()
       encontrada = store.solicitudes.find(
         (s) =>
-          (s.numeroSolicitud || s.solicitud || s.codigo || s.numeroContrato || s.contrato) ===
-          codigo,
+          String(s.numeroSolicitud || '').trim().toLowerCase() === codMin ||
+          String(s.solicitud || '').trim().toLowerCase() === codMin ||
+          String(s.codigo || '').trim().toLowerCase() === codMin ||
+          String(s.numeroContrato || '').trim().toLowerCase() === codMin ||
+          String(s.contrato || '').trim().toLowerCase() === codMin ||
+          String(s.id || '').trim().toLowerCase() === codMin ||
+          String(s._id || '').trim().toLowerCase() === codMin ||
+          String(s.contratista || '').trim().toLowerCase() === codMin ||
+          String(s.nombreContratista || '').trim().toLowerCase() === codMin ||
+          String(s.identificacion || '').trim() === String(codigo).trim() ||
+          String(s.documentoContratista || '').trim() === String(codigo).trim(),
       )
     }
 
@@ -1457,79 +1478,58 @@ onMounted(async () => {
         datosSolicitud.value.contratista ||
         encontrada.contratista ||
         encontrada.nombreContratista ||
-        'Paula Valentina Rache Fonseca'
+        (auth.rolUsuario === 'CONTRATISTA' ? auth.usuario?.nombre : '') ||
+        'Contratista'
 
       // Resolver identificación
       let docResuelto = ''
-      const idenStorage =
-        localStorage.getItem(`certificado_identificacion_${codigo}`) ||
-        localStorage.getItem(`certificado_identificacion_${String(codigo).toLowerCase().trim()}`) ||
-        (nomContratista
-          ? localStorage.getItem(
-              `certificado_identificacion_${nomContratista.toLowerCase().trim()}`,
-            )
-          : null)
-      if (idenStorage && idenStorage !== '—' && idenStorage !== '1098765432') {
-        docResuelto = idenStorage
-      }
-
-      if (
-        !docResuelto &&
-        datosSolicitud.value.identificacion &&
-        datosSolicitud.value.identificacion !== '—' &&
-        datosSolicitud.value.identificacion !== '1098765432'
-      ) {
-        docResuelto = datosSolicitud.value.identificacion
+      if (encontrada.identificacion && encontrada.identificacion !== '—') {
+        docResuelto = String(encontrada.identificacion).trim()
+      } else if (encontrada.documentoContratista && encontrada.documentoContratista !== '—') {
+        docResuelto = String(encontrada.documentoContratista).trim()
+      } else if (encontrada.documento && encontrada.documento !== '—') {
+        docResuelto = String(encontrada.documento).trim()
       }
 
       if (!docResuelto) {
-        if (
-          encontrada.identificacion &&
-          encontrada.identificacion !== '—' &&
-          encontrada.identificacion !== '1098765432'
-        ) {
-          docResuelto = encontrada.identificacion
-        } else if (
-          encontrada.documento &&
-          encontrada.documento !== '—' &&
-          encontrada.documento !== '1098765432'
-        ) {
-          docResuelto = encontrada.documento
-        } else if (
-          encontrada.documentoContratista &&
-          encontrada.documentoContratista !== '—' &&
-          encontrada.documentoContratista !== '1098765432'
-        ) {
-          docResuelto = encontrada.documentoContratista
+        const idenStorage =
+          localStorage.getItem(`certificado_identificacion_${codigo}`) ||
+          localStorage.getItem(`certificado_identificacion_${String(codigo).toLowerCase().trim()}`) ||
+          (numContrato ? localStorage.getItem(`certificado_identificacion_${numContrato}`) : null) ||
+          (numContrato ? localStorage.getItem(`certificado_identificacion_${String(numContrato).toLowerCase().trim()}`) : null) ||
+          (nomContratista
+            ? localStorage.getItem(
+                `certificado_identificacion_${nomContratista.toLowerCase().trim()}`,
+              )
+            : null)
+        if (idenStorage && idenStorage !== '—') {
+          docResuelto = idenStorage.trim()
         }
       }
 
-      if (!docResuelto || docResuelto === '—' || docResuelto === '1098765432') {
+      if (!docResuelto && datosSolicitud.value.identificacion && datosSolicitud.value.identificacion !== '—') {
+        docResuelto = String(datosSolicitud.value.identificacion).trim()
+      }
+
+      if (!docResuelto && nomContratista) {
         const conMatch = contratistasStore.contratistas?.find(
           (c) => (c.nombre || '').trim().toLowerCase() === nomContratista.trim().toLowerCase(),
         )
-        if (conMatch?.documento) {
-          docResuelto = conMatch.documento
-        } else if (
-          auth.usuario?.documento &&
-          (auth.rolUsuario === 'CONTRATISTA' ||
-            (auth.usuario?.nombre || '').trim().toLowerCase() ===
-              nomContratista.trim().toLowerCase())
-        ) {
-          docResuelto = auth.usuario.documento
-        } else if (auth.usuario?.identificacion) {
-          docResuelto = auth.usuario.identificacion
+        if (conMatch?.documento && conMatch.documento !== '—') {
+          docResuelto = String(conMatch.documento).trim()
         }
       }
 
-      if (!docResuelto || docResuelto === '—') {
-        if (encontrada.identificacion && encontrada.identificacion !== '—')
-          docResuelto = encontrada.identificacion
-        else if (encontrada.documento && encontrada.documento !== '—')
-          docResuelto = encontrada.documento
-        else if (encontrada.documentoContratista && encontrada.documentoContratista !== '—')
-          docResuelto = encontrada.documentoContratista
-        else docResuelto = '1098765432'
+      if (!docResuelto && auth.usuario) {
+        if (
+          auth.rolUsuario === 'CONTRATISTA' ||
+          (auth.usuario?.nombre || '').trim().toLowerCase() === nomContratista.trim().toLowerCase()
+        ) {
+          const docAuth = auth.usuario.documento || auth.usuario.identificacion
+          if (docAuth && docAuth !== '—') {
+            docResuelto = String(docAuth).trim()
+          }
+        }
       }
 
       datosSolicitud.value = {
@@ -1583,38 +1583,51 @@ onMounted(async () => {
             item._id === codigo ||
             item.numero_contrato === codigo ||
             item.id === codigo ||
-            item.numero === codigo,
+            item.numero === codigo ||
+            (item.numero_contrato && String(item.numero_contrato).toLowerCase().trim() === String(codigo).toLowerCase().trim()) ||
+            (item.nombre_contratista && String(item.nombre_contratista).toLowerCase().trim() === String(codigo).toLowerCase().trim()),
         )
         if (c) {
           const nomApi =
-            datosSolicitud.value.contratista ||
             c.nombre_contratista ||
             c.contratista ||
-            'Paula Valentina Rache Fonseca'
+            datosSolicitud.value.contratista ||
+            (auth.rolUsuario === 'CONTRATISTA' ? auth.usuario?.nombre : '') ||
+            'Contratista'
+
           let docApi =
-            (datosSolicitud.value.identificacion &&
-            datosSolicitud.value.identificacion !== '—' &&
-            datosSolicitud.value.identificacion !== '1098765432'
-              ? datosSolicitud.value.identificacion
-              : '') ||
             c.documento_contratista ||
             c.identificacion ||
             c.documento ||
             c.usuario?.documento ||
+            localStorage.getItem(`certificado_identificacion_${codigo}`) ||
+            localStorage.getItem(`certificado_identificacion_${String(codigo).toLowerCase().trim()}`) ||
+            (c.numero_contrato ? localStorage.getItem(`certificado_identificacion_${c.numero_contrato}`) : null) ||
+            (nomApi ? localStorage.getItem(`certificado_identificacion_${nomApi.toLowerCase().trim()}`) : null) ||
+            datosSolicitud.value.identificacion ||
             ''
-          if (!docApi || docApi === '—' || docApi === '1098765432') {
+
+          if (!docApi || docApi === '—') {
             const matchCt = contratistasStore.contratistas?.find(
               (ct) => (ct.nombre || '').trim().toLowerCase() === nomApi.trim().toLowerCase(),
             )
-            if (matchCt?.documento) docApi = matchCt.documento
-            else if (auth.usuario?.documento) docApi = auth.usuario.documento
-            else if (auth.usuario?.identificacion) docApi = auth.usuario.identificacion
+            if (matchCt?.documento && matchCt.documento !== '—') {
+              docApi = matchCt.documento
+            } else if (
+              auth.usuario?.documento &&
+              (auth.rolUsuario === 'CONTRATISTA' ||
+                (auth.usuario?.nombre || '').trim().toLowerCase() === nomApi.trim().toLowerCase())
+            ) {
+              docApi = auth.usuario.documento
+            } else if (auth.usuario?.identificacion && auth.rolUsuario === 'CONTRATISTA') {
+              docApi = auth.usuario.identificacion
+            }
           }
 
           datosSolicitud.value = {
             ...datosSolicitud.value,
             contratista: nomApi,
-            identificacion: docApi || '1098765432',
+            identificacion: docApi || '',
             ciudad:
               !datosSolicitud.value.ciudad || datosSolicitud.value.ciudad === 'Ibagué'
                 ? c.ciudad && c.ciudad !== 'Ibagué'
@@ -1647,7 +1660,7 @@ onMounted(async () => {
         console.warn('Carga diferida contrato:', err.message)
       }
 
-      // Si aún faltan datos de contratista, buscar por usuario (e.g. 'stiven')
+      // Si aún faltan datos de contratista, buscar por usuario
       try {
         const respUsuarios = await api.get('/usuarios?rol=Contratista')
         const listaUsuarios = Array.isArray(respUsuarios.data)
@@ -1664,7 +1677,7 @@ onMounted(async () => {
         )
         if (u) {
           const nomLimpio = u.nombre_completo || u.nombre || codigo
-          const docLimpio = u.documento || u.telefono || '1234567899'
+          const docLimpio = u.documento || u.telefono || ''
           const depLimpia = (
             u.dependencia ||
             u.dependencia_id?.nombre_dependencia ||
@@ -1693,19 +1706,15 @@ onMounted(async () => {
       }
     }
 
-    // Verificación final de identificación si quedó vacía o placeholder
-    if (
-      !datosSolicitud.value.identificacion ||
-      datosSolicitud.value.identificacion === '—' ||
-      datosSolicitud.value.identificacion === '1098765432'
-    ) {
-      const nomFinal = (datosSolicitud.value.contratista || auth.usuario?.nombre || '')
+    // Verificación final de identificación si quedó vacía
+    if (!datosSolicitud.value.identificacion || datosSolicitud.value.identificacion === '—') {
+      const nomFinal = (datosSolicitud.value.contratista || (auth.rolUsuario === 'CONTRATISTA' ? auth.usuario?.nombre : '') || '')
         .trim()
         .toLowerCase()
       const conMatch = contratistasStore.contratistas?.find(
         (c) => (c.nombre || '').trim().toLowerCase() === nomFinal,
       )
-      if (conMatch?.documento) {
+      if (conMatch?.documento && conMatch.documento !== '—') {
         datosSolicitud.value.identificacion = conMatch.documento
       } else if (
         auth.usuario?.documento &&
@@ -1713,7 +1722,7 @@ onMounted(async () => {
           (auth.usuario?.nombre || '').trim().toLowerCase() === nomFinal)
       ) {
         datosSolicitud.value.identificacion = auth.usuario.documento
-      } else if (auth.usuario?.identificacion) {
+      } else if (auth.usuario?.identificacion && auth.rolUsuario === 'CONTRATISTA') {
         datosSolicitud.value.identificacion = auth.usuario.identificacion
       }
     }

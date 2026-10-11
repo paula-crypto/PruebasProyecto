@@ -210,6 +210,9 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
             c.documento ||
             c.usuario?.documento ||
             c.usuario?.identificacion ||
+            localStorage.getItem(`certificado_identificacion_${num}`) ||
+            localStorage.getItem(`certificado_identificacion_${String(num).toLowerCase().trim()}`) ||
+            (nom ? localStorage.getItem(`certificado_identificacion_${nom.toLowerCase().trim()}`) : '') ||
             ''
           if (!docCon || docCon === '—') {
             const baseMatch = solicitudesBase.find(
@@ -220,6 +223,10 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
             if (baseMatch?.documentoContratista) {
               docCon = baseMatch.documentoContratista
             }
+          }
+          if (docCon && docCon !== '—') {
+            localStorage.setItem(`certificado_identificacion_${num}`, docCon)
+            if (nom) localStorage.setItem(`certificado_identificacion_${nom.toLowerCase().trim()}`, docCon)
           }
 
           return {
@@ -298,6 +305,13 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
     const sup = nuevaSolicitud.responsable || 'Supervisor Asignado'
     const fch = nuevaSolicitud.fecha || new Date().toISOString().split('T')[0]
     const est = 'En revisión'
+
+    if (doc) {
+      localStorage.setItem(`certificado_identificacion_${num}`, doc)
+      localStorage.setItem(`certificado_identificacion_${String(num).toLowerCase().trim()}`, doc)
+      if (nom) localStorage.setItem(`certificado_identificacion_${nom.toLowerCase().trim()}`, doc)
+      localStorage.setItem(`certificado_identificacion_${doc}`, doc)
+    }
 
     const solicitudAInsertar = {
       ...nuevaSolicitud,

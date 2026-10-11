@@ -483,6 +483,21 @@ async function guardarContratista() {
   }
 
   guardando.value = true
+  const docCon = (contratista.value.documento || '').trim()
+  const nomCon = (contratista.value.nombre || '').trim()
+  const numCon = (contratista.value.numeroContrato || '').trim()
+
+  if (docCon) {
+    if (numCon) {
+      localStorage.setItem(`certificado_identificacion_${numCon}`, docCon)
+      localStorage.setItem(`certificado_identificacion_${numCon.toLowerCase()}`, docCon)
+    }
+    if (nomCon) {
+      localStorage.setItem(`certificado_identificacion_${nomCon.toLowerCase()}`, docCon)
+    }
+    localStorage.setItem(`certificado_identificacion_${docCon}`, docCon)
+  }
+
   try {
     if (editando.value) {
       store.editar(indiceEditar.value, { ...contratista.value })

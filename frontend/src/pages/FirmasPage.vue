@@ -1004,6 +1004,34 @@ function seleccionarYFirmar(fila) {
 function verPdfFila(fila) {
   const cod =
     fila.numeroSolicitud || fila.solicitud || fila.codigo || fila.numeroContrato || fila.contrato
+  const numCon = fila.numeroContrato || fila.contrato || cod
+  const nomCon = (fila.contratista || fila.nombreContratista || '').trim()
+  const iden = (fila.identificacion || fila.documentoContratista || fila.documento || '').trim()
+
+  if (iden && iden !== '—') {
+    if (cod) {
+      localStorage.setItem(`certificado_identificacion_${cod}`, iden)
+      localStorage.setItem(`certificado_identificacion_${String(cod).toLowerCase().trim()}`, iden)
+    }
+    if (numCon) {
+      localStorage.setItem(`certificado_identificacion_${numCon}`, iden)
+      localStorage.setItem(`certificado_identificacion_${numCon.toLowerCase().trim()}`, iden)
+    }
+    if (nomCon) {
+      localStorage.setItem(`certificado_identificacion_${nomCon.toLowerCase().trim()}`, iden)
+    }
+    localStorage.setItem(`certificado_identificacion_${iden}`, iden)
+  }
+  const datosParaPdf = {
+    contratista: nomCon,
+    identificacion: iden,
+    numeroContrato: numCon,
+    dependencia: fila.dependencia || 'Gestión Tecnológica (TIC)',
+    estado: fila.estado || 'En revisión',
+  }
+  if (cod) localStorage.setItem(`certificado_datos_${cod}`, JSON.stringify(datosParaPdf))
+  if (numCon) localStorage.setItem(`certificado_datos_${numCon}`, JSON.stringify(datosParaPdf))
+
   router.push({ name: 'certificado-pdf', query: { codigo: cod } })
 }
 
@@ -1217,6 +1245,34 @@ async function confirmarFirma() {
 
 function imprimirCertificado() {
   if (codigoSolicitud.value) {
+    const s = solicitudActual.value
+    if (s) {
+      const cod = codigoSolicitud.value
+      const numCon = s.numeroContrato || s.contrato || cod
+      const nomCon = (s.contratista || s.nombreContratista || '').trim()
+      const iden = (s.identificacion || s.documentoContratista || s.documento || '').trim()
+      if (iden && iden !== '—') {
+        localStorage.setItem(`certificado_identificacion_${cod}`, iden)
+        localStorage.setItem(`certificado_identificacion_${String(cod).toLowerCase().trim()}`, iden)
+        if (numCon) {
+          localStorage.setItem(`certificado_identificacion_${numCon}`, iden)
+          localStorage.setItem(`certificado_identificacion_${numCon.toLowerCase().trim()}`, iden)
+        }
+        if (nomCon) {
+          localStorage.setItem(`certificado_identificacion_${nomCon.toLowerCase().trim()}`, iden)
+        }
+        localStorage.setItem(`certificado_identificacion_${iden}`, iden)
+      }
+      const datosParaPdf = {
+        contratista: nomCon,
+        identificacion: iden,
+        numeroContrato: numCon,
+        dependencia: s.dependencia || 'Gestión Tecnológica (TIC)',
+        estado: s.estado || 'En revisión',
+      }
+      localStorage.setItem(`certificado_datos_${cod}`, JSON.stringify(datosParaPdf))
+      if (numCon) localStorage.setItem(`certificado_datos_${numCon}`, JSON.stringify(datosParaPdf))
+    }
     router.push({ name: 'certificado-pdf', query: { codigo: codigoSolicitud.value } })
   } else {
     window.print()

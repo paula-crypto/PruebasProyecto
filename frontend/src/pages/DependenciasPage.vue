@@ -78,14 +78,14 @@
             flat
             round
             dense
-            color="negative"
-            icon="domain_disabled"
+            :color="props.row.estado === 'Inactivo' || props.row.estado === 'Inactiva' ? 'positive' : 'negative'"
+            :icon="props.row.estado === 'Inactivo' || props.row.estado === 'Inactiva' ? 'check_circle' : 'domain_disabled'"
             @click="eliminarDependencia(props.row)"
           >
             <q-tooltip>{{
               props.row.estado === 'Inactivo' || props.row.estado === 'Inactiva'
-                ? 'Activar Dependencia'
-                : 'Desactivar Dependencia'
+                ? `Activar dependencia: ${props.row.nombre || props.row.nombre_dependencia}`
+                : `Desactivar dependencia: ${props.row.nombre || props.row.nombre_dependencia}`
             }}</q-tooltip>
           </q-btn>
         </q-td>
@@ -269,7 +269,7 @@
 
     <!-- Diálogo Confirmar Desactivación / Activación -->
     <q-dialog v-model="dialogoEliminar">
-      <q-card style="min-width: 350px">
+      <q-card style="min-width: 420px; max-width: 90vw">
         <q-card-section class="row items-center">
           <q-avatar
             :icon="esInactivaSeleccionada ? 'check_circle' : 'domain_disabled'"
@@ -277,23 +277,30 @@
             text-color="white"
             class="q-mr-sm"
           />
-          <span class="text-h6">{{
+          <span class="text-h6 text-weight-bold">{{
             esInactivaSeleccionada ? 'Confirmar activación' : 'Confirmar desactivación'
           }}</span>
         </q-card-section>
 
         <q-card-section class="q-pt-none text-body1">
           ¿Está seguro de {{ esInactivaSeleccionada ? 'activar' : 'desactivar' }} la dependencia
-          <strong>{{ nombreEliminar }}</strong
+          <strong class="text-primary text-weight-bold">{{ nombreEliminar }}</strong
           >?
+          <div class="text-caption text-grey-7 q-mt-xs">
+            {{
+              esInactivaSeleccionada
+                ? 'El área quedará habilitada para firmar y validar compromisos contractuales.'
+                : 'Esta área no podrá firmar ni validar nuevos trámites hasta que sea reactivada.'
+            }}
+          </div>
         </q-card-section>
 
-        <q-card-actions align="right">
+        <q-card-actions align="right" class="q-px-md q-pb-md">
           <q-btn flat label="Cancelar" color="grey-8" v-close-popup />
           <q-btn
             unelevated
             :color="esInactivaSeleccionada ? 'positive' : 'negative'"
-            :label="esInactivaSeleccionada ? 'Activar' : 'Desactivar'"
+            :label="esInactivaSeleccionada ? 'Activar Dependencia' : 'Desactivar Dependencia'"
             @click="confirmarEliminar"
           />
         </q-card-actions>
@@ -528,17 +535,16 @@ const esInactivaSeleccionada = computed(() => {
 
 const nombreEliminar = computed(() => {
   if (dependenciaSeleccionadaEliminar.value) {
-    return (
+    const nom =
       dependenciaSeleccionadaEliminar.value.nombre ||
-      dependenciaSeleccionadaEliminar.value.nombre_dependencia ||
-      codigoEliminar.value ||
-      'la dependencia'
-    )
+      dependenciaSeleccionadaEliminar.value.nombre_dependencia
+    if (nom) return nom
   }
+  const cod = codigoEliminar.value
   const d = store.dependencias.find(
-    (item) => item.codigo === codigoEliminar.value || item._id === codigoEliminar.value,
+    (item) => item.codigo === cod || item._id === cod || item.id === cod,
   )
-  return d?.nombre || d?.nombre_dependencia || codigoEliminar.value || 'la dependencia'
+  return d?.nombre || d?.nombre_dependencia || 'la dependencia'
 })
 
 const dependencia = ref({
@@ -660,12 +666,13 @@ function editarDependencia(fila) {
 
 function eliminarDependencia(item) {
   if (typeof item === 'object' && item !== null) {
-    dependenciaSeleccionadaEliminar.value = item
-    codigoEliminar.value = item.codigo || item._id || ''
+    dependenciaSeleccionadaEliminar.value = { ...item }
+    codigoEliminar.value = item.codigo || item._id || item.id || ''
   } else {
     codigoEliminar.value = item
-    dependenciaSeleccionadaEliminar.value =
-      store.dependencias.find((d) => d.codigo === item || d._id === item) || null
+    const encontrada =
+      store.dependencias.find((d) => d.codigo === item || d._id === item || d.id === item) || null
+    dependenciaSeleccionadaEliminar.value = encontrada ? { ...encontrada } : null
   }
   dialogoEliminar.value = true
 }

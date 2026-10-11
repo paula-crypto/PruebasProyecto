@@ -287,7 +287,7 @@ exports.obtenerContrato = asyncHandler(async (req, res) => {
     const contrato = await Contrato.findById(req.params.id)
         .populate('dependencia', 'nombre_dependencia')
         .populate('supervisor', 'nombre_completo correo_institucional')
-        .populate('usuario', 'nombre_completo correo_institucional');
+        .populate('usuario', 'nombre_completo correo_institucional documento telefono');
 
     if (!contrato) {
         throw new AppError('Contrato no encontrado.', 404);
@@ -304,8 +304,14 @@ exports.obtenerContrato = asyncHandler(async (req, res) => {
         throw new AppError('Acceso denegado. No estás asignado a este contrato.', 403);
     }
 
+    const docResuelto = contrato.documento_contratista || contrato.usuario?.documento || '';
+    const contratoObj = contrato.toObject();
+    contratoObj.documento_contratista = docResuelto;
+    contratoObj.identificacion = docResuelto;
+    contratoObj.documento = docResuelto;
+
     const bienes = await BienEntregado.find({ contrato_id: contrato._id });
-    res.status(200).json({ contrato, bienes });
+    res.status(200).json({ contrato: contratoObj, bienes });
 });
 
 // RF-002: Actualizar contrato (Contratista en Borrador, o Supervisor/Administrador en cualquier momento)

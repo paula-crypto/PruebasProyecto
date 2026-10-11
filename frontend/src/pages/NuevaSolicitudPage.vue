@@ -23,38 +23,75 @@
               1. Información del Contrato
             </div>
 
+            <q-banner dense rounded class="bg-blue-1 text-primary q-my-xs text-caption">
+              <template #avatar>
+                <q-icon name="info" color="primary" />
+              </template>
+              <div>
+                <strong>Vigencia y Contrato Anual:</strong> Los contratistas van cambiando el número de contrato por año (vigencia fiscal). Seleccione el año de vigencia y verifique el número de contrato e identificación para el certificado oficial GCCON-F-088.
+              </div>
+            </q-banner>
+
             <div class="row q-col-gutter-sm">
-              <div class="col-12 col-sm-4">
+              <div class="col-12 col-sm-3">
+                <q-select
+                  v-model="form.vigencia"
+                  outlined
+                  dense
+                  label="Vigencia / Año *"
+                  :options="opcionesVigencia"
+                  @update:model-value="alCambiarVigencia"
+                  hint="Año fiscal del contrato"
+                  :rules="[(val) => !!val || 'Seleccione la vigencia']"
+                >
+                  <template #prepend>
+                    <q-icon name="calendar_today" color="primary" />
+                  </template>
+                </q-select>
+              </div>
+              <div class="col-12 col-sm-3">
                 <q-input
                   v-model="form.numeroContrato"
                   outlined
                   dense
-                  label="Número de Contrato (Vigencia Actual) *"
+                  label="Número de Contrato *"
                   placeholder="Ej. CNT-2026-014"
-                  hint="Indique el contrato de la vigencia a liquidar (varía por año)"
+                  hint="Contrato del año a liquidar"
                   :rules="[(val) => !!val || 'El número de contrato es obligatorio']"
-                />
+                >
+                  <template #prepend>
+                    <q-icon name="description" color="primary" />
+                  </template>
+                </q-input>
               </div>
-              <div class="col-12 col-sm-4">
+              <div class="col-12 col-sm-3">
                 <q-input
                   v-model="form.contratista"
                   outlined
                   dense
                   label="Nombre del Contratista *"
-                  placeholder="Nombre completo del contratista"
-                  :rules="[(val) => !!val || 'El nombre del contratista es obligatorio']"
-                />
+                  placeholder="Nombre completo"
+                  :rules="[(val) => !!val || 'El nombre es obligatorio']"
+                >
+                  <template #prepend>
+                    <q-icon name="person" color="primary" />
+                  </template>
+                </q-input>
               </div>
-              <div class="col-12 col-sm-4">
+              <div class="col-12 col-sm-3">
                 <q-input
                   v-model="form.identificacion"
                   outlined
                   dense
                   label="Identificación / Cédula *"
                   placeholder="Ej. 1098765432"
-                  hint="Documento oficial para GCCON-F-088"
+                  hint="Cédula para GCCON-F-088"
                   :rules="[(val) => !!val || 'La identificación es obligatoria']"
-                />
+                >
+                  <template #prepend>
+                    <q-icon name="badge" color="primary" />
+                  </template>
+                </q-input>
               </div>
             </div>
 
@@ -204,8 +241,10 @@ const auth = useAuthStore()
 const cargando = ref(false)
 
 const anioActual = new Date().getFullYear()
+const opcionesVigencia = ref(['2024', '2025', '2026', '2027', '2028'])
 
 const form = ref({
+  vigencia: String(anioActual),
   numeroContrato:
     auth.usuario?.numeroContrato || `CNT-${anioActual}-${Math.floor(100 + Math.random() * 900)}`,
   contratista: auth.usuario?.nombre || '',
@@ -217,6 +256,22 @@ const form = ref({
   supervisor: null,
   adjunto: null,
 })
+
+function alCambiarVigencia(nuevoAnio) {
+  form.value.vigencia = String(nuevoAnio)
+  if (form.value.numeroContrato) {
+    if (/CNT-\d{4}-/i.test(form.value.numeroContrato)) {
+      form.value.numeroContrato = form.value.numeroContrato.replace(/CNT-\d{4}-/i, `CNT-${nuevoAnio}-`)
+    } else if (/^\d{4}-/i.test(form.value.numeroContrato)) {
+      form.value.numeroContrato = form.value.numeroContrato.replace(/^\d{4}-/i, `${nuevoAnio}-`)
+    } else {
+      const consecutivo = form.value.numeroContrato.replace(/\D/g, '').slice(-3) || '014'
+      form.value.numeroContrato = `CNT-${nuevoAnio}-${consecutivo}`
+    }
+  } else {
+    form.value.numeroContrato = `CNT-${nuevoAnio}-${Math.floor(100 + Math.random() * 900)}`
+  }
+}
 
 const opcionesDependencias = ref([
   'Sistemas e Informática',
@@ -271,6 +326,15 @@ onMounted(async () => {
   if (!form.value.identificacion && (auth.usuario?.documento || auth.usuario?.identificacion)) {
     form.value.identificacion = auth.usuario?.documento || auth.usuario?.identificacion
   }
+  if (form.value.numeroContrato) {
+    const match = String(form.value.numeroContrato).match(/CNT-(\d{4})-/i)
+    if (match && match[1]) {
+      form.value.vigencia = match[1]
+      if (!opcionesVigencia.value.includes(match[1])) {
+        opcionesVigencia.value.unshift(match[1])
+      }
+    }
+  }
   try {
     await dependenciasStore.cargarDependencias()
     if (dependenciasStore.dependencias.length > 0) {
@@ -316,12 +380,17 @@ async function guardarSolicitud() {
       ? form.value.dependencia?.nombre || form.value.dependencia?.label
       : form.value.dependencia || 'Gestión Tecnológica'
 
+  const numContrato = (form.value.numeroContrato || '').trim()
+
   const nuevaSolicitud = {
-    numeroContrato: form.value.numeroContrato,
+    numeroContrato: numContrato,
+    contrato: numContrato,
     contratista: nomContratista,
     nombreContratista: nomContratista,
     identificacion: docContratista,
     documentoContratista: docContratista,
+    documento: docContratista,
+    vigencia: form.value.vigencia || anioActual,
     correo: auth.usuario?.correo || auth.usuario?.correo_institucional || '',
     dependencia: depNombre,
     responsable: supNombre,
@@ -329,7 +398,22 @@ async function guardarSolicitud() {
     fechaInicio: form.value.fechaInicio,
     fechaFin: form.value.fechaFin,
     fecha: form.value.fechaInicio || new Date().toISOString().split('T')[0],
+    fechaContrato: form.value.fechaInicio || new Date().toISOString().split('T')[0],
     estado: 'En revisión',
+  }
+
+  // Guardar en localStorage para disponibilidad inmediata en el formato oficial GCCON-F-088
+  if (docContratista) {
+    localStorage.setItem(`certificado_identificacion_${numContrato}`, docContratista)
+    localStorage.setItem(`certificado_identificacion_${numContrato.toLowerCase()}`, docContratista)
+    localStorage.setItem(`certificado_identificacion_${nomContratista.toLowerCase()}`, docContratista)
+    localStorage.setItem(`certificado_identificacion_${docContratista}`, docContratista)
+  }
+  localStorage.setItem(`certificado_datos_${numContrato}`, JSON.stringify(nuevaSolicitud))
+  localStorage.setItem(`certificado_datos_${numContrato.toLowerCase()}`, JSON.stringify(nuevaSolicitud))
+  localStorage.setItem(`certificado_datos_${nomContratista.toLowerCase()}`, JSON.stringify(nuevaSolicitud))
+  if (docContratista) {
+    localStorage.setItem(`certificado_datos_${docContratista}`, JSON.stringify(nuevaSolicitud))
   }
 
   try {
