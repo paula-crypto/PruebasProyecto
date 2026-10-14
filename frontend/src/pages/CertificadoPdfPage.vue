@@ -2669,7 +2669,7 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 
 .fila-contratista-1 {
   display: flex;
-  border-bottom: 1px dotted #000000;
+  border-bottom: 1px solid #000000;
   min-height: 25px;
 }
 
@@ -2678,7 +2678,7 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
   display: flex;
   align-items: center;
   padding: 3px 6px;
-  border-right: 1px dotted #000000;
+  border-right: 1px solid #000000;
 }
 
 .celda-identificacion-header {
@@ -2693,14 +2693,14 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 
 .fila-contratista-2 {
   display: flex;
-  border-bottom: 1px dotted #000000;
+  border-bottom: 1px solid #000000;
   min-height: 25px;
 }
 
 .bloque-ciudad-fecha-regional {
   flex: 1;
   display: flex;
-  border-right: 1px dotted #000000;
+  border-right: 1px solid #000000;
 }
 
 .celda-identificacion-valor {
@@ -2720,7 +2720,7 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 
 .celda-ciudad-val {
   flex: 1.2;
-  border-right: 1px dotted #000000;
+  border-right: 1px solid #000000;
 }
 
 .celda-fecha-lbl {
@@ -2730,13 +2730,13 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 
 .celda-fecha-val {
   flex: 1;
-  border-right: 1px dotted #000000;
+  border-right: 1px solid #000000;
 }
 
 .celda-regional-lbl {
   width: 70px;
   flex-shrink: 0;
-  border-right: 1px dotted #000000;
+  border-right: 1px solid #000000;
 }
 
 .celda-regional-val {
@@ -2745,7 +2745,7 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 
 .fila-contratista-3 {
   display: flex;
-  border-bottom: 1px dotted #000000;
+  border-bottom: 1px solid #000000;
   min-height: 25px;
 }
 
@@ -2776,7 +2776,7 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
   display: flex;
   align-items: center;
   padding: 2.5px 6px;
-  border-right: 1px dotted #000000;
+  border-right: 1px solid #000000;
   font-weight: 800;
   white-space: nowrap;
 }
@@ -3037,7 +3037,7 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 }
 
 .linea-punto {
-  border-bottom: 1px dotted #000000;
+  border-bottom: 1px solid #000000;
   width: 100%;
   height: 1px;
 }
@@ -3068,7 +3068,7 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 
 .otros-puntos {
   flex: 1;
-  border-bottom: 1px dotted #000000;
+  border-bottom: 1px solid #000000;
   height: 1px;
   margin-bottom: 2px;
 }
