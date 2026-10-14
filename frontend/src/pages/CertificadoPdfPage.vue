@@ -391,6 +391,10 @@
                 • <strong>{{ nov.dependencia }}:</strong> {{ nov.motivo }}
               </div>
             </div>
+            <div v-else class="lineas-puntos-elementos">
+              <div class="linea-punto"></div>
+              <div class="linea-punto"></div>
+            </div>
           </div>
 
           <div class="fila-otros-inf">
@@ -2666,14 +2670,14 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 .fila-contratista-1 {
   display: flex;
   border-bottom: 1px dotted #000000;
-  min-height: 22px;
+  min-height: 25px;
 }
 
 .celda-nombre-contratista {
   flex: 1;
   display: flex;
   align-items: center;
-  padding: 2.5px 6px;
+  padding: 3px 6px;
   border-right: 1px dotted #000000;
 }
 
@@ -2684,13 +2688,13 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
   justify-content: center;
   text-align: center;
   font-weight: 800;
-  padding: 2.5px 6px;
+  padding: 3px 6px;
 }
 
 .fila-contratista-2 {
   display: flex;
   border-bottom: 1px dotted #000000;
-  min-height: 22px;
+  min-height: 25px;
 }
 
 .bloque-ciudad-fecha-regional {
@@ -2706,7 +2710,7 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
   justify-content: center;
   text-align: center;
   font-weight: 700;
-  padding: 2.5px 6px;
+  padding: 3px 6px;
 }
 
 .celda-ciudad-lbl {
@@ -2742,7 +2746,7 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 .fila-contratista-3 {
   display: flex;
   border-bottom: 1px dotted #000000;
-  min-height: 22px;
+  min-height: 25px;
 }
 
 .celda-direccion-lbl {
@@ -2756,7 +2760,7 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 
 .fila-contratista-4 {
   display: flex;
-  min-height: 22px;
+  min-height: 25px;
 }
 
 .celda-contrato-lbl {
@@ -2931,7 +2935,7 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
   display: grid;
   grid-template-columns: 155px 44px 1.4fr 1fr;
   border-bottom: 1px solid #000000;
-  min-height: 18px;
+  min-height: 24.5px;
 }
 
 .tr-row:last-child {
@@ -2940,11 +2944,11 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 
 .td-dep {
   border-right: 1px solid #000000;
-  padding: 2.5px 4px;
+  padding: 3px 5px;
   display: flex;
   align-items: center;
-  font-size: 7px;
-  line-height: 1.15;
+  font-size: 7.2px;
+  line-height: 1.2;
 }
 
 .td-marca {
@@ -2952,30 +2956,30 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 800;
 }
 
 .td-nombres {
   border-right: 1px solid #000000;
-  padding: 2.5px 4px;
+  padding: 3px 5px;
   display: flex;
   align-items: center;
-  font-size: 7px;
-  line-height: 1.15;
+  font-size: 7.2px;
+  line-height: 1.2;
 }
 
 .td-firma {
-  padding: 2px;
-  min-height: 16px;
+  padding: 2px 4px;
+  min-height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .img-firma-tabla {
-  max-width: 95px;
-  max-height: 18px;
+  max-width: 105px;
+  max-height: 21px;
   object-fit: contain;
   display: block;
 }
@@ -2984,7 +2988,7 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
   display: inline-flex;
   align-items: center;
   color: #1976d2;
-  font-size: 7px;
+  font-size: 7.5px;
   font-weight: 700;
   opacity: 0.8;
 }
@@ -3017,8 +3021,25 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 }
 
 .espacio-elementos {
-  min-height: 22px;
-  padding: 2px 6px;
+  min-height: 44px;
+  padding: 3px 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.lineas-puntos-elementos {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  padding: 8px 0 3px;
+}
+
+.linea-punto {
+  border-bottom: 1px dotted #000000;
+  width: 100%;
+  height: 1px;
 }
 
 .lista-elementos-pendientes {
@@ -3034,7 +3055,8 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 .fila-otros-inf {
   display: flex;
   align-items: baseline;
-  padding: 2px 6px 6px;
+  padding: 3px 6px 6px;
+  min-height: 26px;
 }
 
 .otros-label {
@@ -3057,30 +3079,30 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 }
 
 .zona-firma-inf {
-  min-height: 65px;
+  min-height: 86px;
   display: flex;
   justify-content: flex-end;
   align-items: flex-end;
-  padding: 8px 30px 10px 8px;
+  padding: 8px 30px 12px 8px;
 }
 
 .caja-firma-contratista {
-  width: 180px;
+  width: 190px;
   text-align: center;
 }
 
 .contenedor-firma-img {
   width: 100%;
-  height: 52px;
+  height: 64px;
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  margin-bottom: 2px;
+  margin-bottom: 3px;
 }
 
 .img-firma-estampada {
-  max-width: 175px;
-  max-height: 50px;
+  max-width: 185px;
+  max-height: 60px;
   object-fit: contain;
   transition: transform 0.15s ease;
 }
@@ -3096,8 +3118,9 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 }
 
 .texto-firma-sola {
-  font-size: 7.5px;
-  font-weight: 700;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
   color: #000000;
   text-align: center;
 }
@@ -3181,7 +3204,7 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 @media print {
   @page {
     size: letter portrait;
-    margin: 6mm 8mm;
+    margin: 5mm 7mm;
   }
 
   *,
@@ -3254,6 +3277,31 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
     page-break-before: avoid !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
+  }
+
+  .tr-row {
+    min-height: 25px !important;
+  }
+
+  .td-dep,
+  .td-nombres {
+    font-size: 7.3px !important;
+  }
+
+  .espacio-elementos {
+    min-height: 48px !important;
+  }
+
+  .zona-firma-inf {
+    min-height: 88px !important;
+  }
+
+  .contenedor-firma-img {
+    height: 65px !important;
+  }
+
+  .img-firma-estampada {
+    max-height: 62px !important;
   }
 
   .marca-agua-rechazado {
