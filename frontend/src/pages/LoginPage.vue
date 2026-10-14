@@ -39,8 +39,9 @@
         <q-input
           v-model="credencial"
           id="email"
+          for="email"
           name="email"
-          type="email"
+          type="text"
           autocomplete="username"
           data-testid="username-input"
           outlined
@@ -58,6 +59,7 @@
         <q-input
           v-model="password"
           id="password"
+          for="password"
           name="password"
           :type="verPassword ? 'text' : 'password'"
           autocomplete="current-password"
