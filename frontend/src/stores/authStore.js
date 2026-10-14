@@ -342,6 +342,8 @@ export const useAuthStore = defineStore('auth', () => {
 
     if (user) {
       usuario.value = { ...user }
+      const mockToken = 'mock-jwt-token-' + Date.now()
+      localStorage.setItem('auth_token', mockToken)
       localStorage.setItem('gccon_user', JSON.stringify(user))
       return { success: true, user }
     } else {

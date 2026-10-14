@@ -38,6 +38,11 @@
         <!-- Campo Credencial -->
         <q-input
           v-model="credencial"
+          id="email"
+          name="email"
+          type="email"
+          autocomplete="username"
+          data-testid="username-input"
           outlined
           dense
           label="Correo o Documento de Identidad *"
@@ -52,9 +57,13 @@
         <!-- Campo Contraseña -->
         <q-input
           v-model="password"
+          id="password"
+          name="password"
+          :type="verPassword ? 'text' : 'password'"
+          autocomplete="current-password"
+          data-testid="password-input"
           outlined
           dense
-          :type="verPassword ? 'text' : 'password'"
           label="Contraseña *"
           class="q-mb-lg"
           :rules="[(val) => !!val || 'La contraseña es requerida']"
@@ -72,6 +81,9 @@
         </q-input>
 
         <q-btn
+          id="btn-login"
+          name="submit"
+          data-testid="login-button"
           type="submit"
           color="positive"
           label="Iniciar sesión"

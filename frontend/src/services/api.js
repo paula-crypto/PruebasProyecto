@@ -6,7 +6,18 @@ import axios from 'axios'
  * - Expulsa al usuario (limpia sesión) cuando el token expira (HTTP 401).
  */
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+const obtenerApiUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL
+  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+    return envUrl
+  }
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return 'https://api-paz-y-salvo.onrender.com/api'
+  }
+  return envUrl || 'http://localhost:3000/api'
+}
+
+const API_URL = obtenerApiUrl()
 
 const api = axios.create({
   baseURL: API_URL,
