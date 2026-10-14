@@ -3177,11 +3177,11 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
   opacity: 0.75;
 }
 
-/* ===================== IMPRESIÓN ===================== */
+/* ===================== IMPRESIÓN OFICIAL 1 HOJA GCCON-F-088 ===================== */
 @media print {
   @page {
     size: letter portrait;
-    margin: 6mm 8mm;
+    margin: 4mm 6mm;
   }
 
   *,
@@ -3197,10 +3197,13 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
     background: #ffffff !important;
     margin: 0 !important;
     padding: 0 !important;
+    height: 100% !important;
+    font-family: Calibri, 'Segoe UI', Arial, sans-serif !important;
   }
 
   .toolbar,
-  .no-print {
+  .no-print,
+  .banner-alerta-pantalla {
     display: none !important;
   }
 
@@ -3214,6 +3217,8 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 
   .badge-na-print {
     display: inline-block !important;
+    font-size: 6.5px !important;
+    font-weight: 800 !important;
   }
 
   .tr-no-aplica {
@@ -3225,11 +3230,13 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
     padding: 0 !important;
     margin: 0 !important;
     min-height: auto !important;
+    height: auto !important;
   }
 
   .documento-wrapper {
     overflow: visible !important;
     padding: 0 !important;
+    margin: 0 auto !important;
     display: block !important;
     max-width: none !important;
     width: 100% !important;
@@ -3243,21 +3250,258 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
     border: 1.5px solid #000000 !important;
     box-shadow: none !important;
     background: #ffffff !important;
+    page-break-after: avoid !important;
+    page-break-before: avoid !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    font-family: Calibri, 'Segoe UI', Arial, sans-serif !important;
   }
 
+  /* Encabezado compacto oficial */
   .encabezado-topo {
-    grid-template-columns: 120px 1fr 120px !important;
+    grid-template-columns: 105px 1fr 105px !important;
+    min-height: 50px !important;
+    border-bottom: 1.5px solid #000000 !important;
   }
 
+  .logo-box {
+    padding: 3px 6px !important;
+  }
+
+  .logo-sena {
+    height: 42px !important;
+  }
+
+  .version-fila {
+    font-size: 8px !important;
+    padding: 1.5px 2px !important;
+    line-height: 1.1 !important;
+  }
+
+  /* Barras Negras y Blancas */
   .barra-negra {
     background: #000000 !important;
     color: #ffffff !important;
+    font-size: 8px !important;
+    padding: 2px 4px !important;
+    line-height: 1.15 !important;
   }
 
-  .causal-caja-cuadrada,
-  .causal-caja-rect {
-    border: 1.5px solid #000000 !important;
+  .fila-blanca {
     background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 8px !important;
+    padding: 2.5px 4px !important;
+    line-height: 1.15 !important;
+  }
+
+  .texto-formato {
+    font-size: 7.5px !important;
+    padding: 3px 4px !important;
+  }
+
+  /* Clasificación de la Información */
+  .clasificacion-tabla {
+    border-bottom: 1px solid #000000 !important;
+  }
+
+  .clasif-col {
+    padding: 1.5px 3px !important;
+    font-size: 7.5px !important;
+  }
+
+  .clasif-check {
+    padding: 1px !important;
+    font-size: 9px !important;
+  }
+
+  /* Datos del Contratista */
+  .seccion-datos {
+    font-size: 7px !important;
+    border-bottom: 1.5px solid #000000 !important;
+  }
+
+  .fila-contratista-1,
+  .fila-contratista-2,
+  .fila-contratista-3,
+  .fila-contratista-4 {
+    min-height: 16px !important;
+  }
+
+  .celda-etiqueta,
+  .celda-valor,
+  .celda-nombre-contratista,
+  .celda-identificacion-header,
+  .celda-identificacion-valor {
+    padding: 1.5px 4px !important;
+    line-height: 1.15 !important;
+  }
+
+  /* Causal de Terminación */
+  .titulo-causal {
+    font-size: 8.5px !important;
+    padding: 4px 2px 2px !important;
+    line-height: 1.1 !important;
+  }
+
+  .fila-causales {
+    padding: 1px 4px 3px !important;
+    gap: 4px !important;
+    border-bottom: 1.5px solid #000000 !important;
+  }
+
+  .causal-nombre {
+    font-size: 6px !important;
+    line-height: 1.05 !important;
+  }
+
+  .causal-caja-cuadrada {
+    width: 17px !important;
+    height: 17px !important;
+    border: 1.2px solid #000000 !important;
+    background: #ffffff !important;
+    font-size: 10px !important;
+  }
+
+  .causal-caja-rect {
+    width: 44px !important;
+    height: 17px !important;
+    border: 1.2px solid #000000 !important;
+    background: #ffffff !important;
+    font-size: 10px !important;
+  }
+
+  /* Tabla de Dependencias Oficial */
+  .tabla-dep {
+    border-bottom: 1.5px solid #000000 !important;
+    font-size: 6.5px !important;
+  }
+
+  .tr-head {
+    grid-template-columns: 140px 36px 1fr !important;
+    min-height: 18px !important;
+  }
+
+  .th-dep {
+    padding: 1.5px 2px !important;
+    font-size: 6.5px !important;
+  }
+
+  .th-marca {
+    padding: 1px !important;
+    font-size: 6px !important;
+    line-height: 1 !important;
+  }
+
+  .th-resp-top {
+    padding: 1px !important;
+    font-size: 6.5px !important;
+  }
+
+  .th-nombres,
+  .th-firma {
+    padding: 1px 2px !important;
+    font-size: 6.5px !important;
+  }
+
+  .tr-row {
+    grid-template-columns: 140px 36px 1.4fr 1fr !important;
+    min-height: 13.5px !important;
+  }
+
+  .td-dep {
+    padding: 1px 3px !important;
+    font-size: 5.8px !important;
+    line-height: 1.05 !important;
+  }
+
+  .td-marca {
+    font-size: 7.5px !important;
+  }
+
+  .td-nombres {
+    padding: 1px 3px !important;
+    font-size: 5.8px !important;
+    line-height: 1.05 !important;
+  }
+
+  .td-firma {
+    padding: 0.5px 1px !important;
+    min-height: 12px !important;
+  }
+
+  .img-firma-tabla {
+    max-width: 75px !important;
+    max-height: 13px !important;
+  }
+
+  .texto-pendiente-fila {
+    font-size: 5.5px !important;
+  }
+
+  .texto-na-detalle {
+    font-size: 5.5px !important;
+  }
+
+  /* Sección Inferior */
+  .seccion-inferior {
+    font-size: 6.5px !important;
+  }
+
+  .fila-elementos {
+    padding: 2px 4px 0 !important;
+    font-size: 6.5px !important;
+  }
+
+  .espacio-elementos {
+    min-height: 14px !important;
+    padding: 1px 4px !important;
+  }
+
+  .lista-elementos-pendientes {
+    font-size: 6px !important;
+  }
+
+  .fila-otros-inf {
+    padding: 1px 4px 2px !important;
+    font-size: 6.5px !important;
+  }
+
+  .otros-label {
+    font-size: 6.5px !important;
+  }
+
+  .linea-separador-inf {
+    border-bottom: 1.5px solid #000000 !important;
+  }
+
+  .zona-firma-inf {
+    min-height: 42px !important;
+    padding: 2px 20px 3px 4px !important;
+  }
+
+  .caja-firma-contratista {
+    width: 140px !important;
+  }
+
+  .contenedor-firma-img {
+    height: 32px !important;
+    margin-bottom: 1px !important;
+  }
+
+  .img-firma-estampada {
+    max-width: 135px !important;
+    max-height: 30px !important;
+  }
+
+  .linea-firma-sola {
+    border-bottom: 1.2px solid #000000 !important;
+    margin-bottom: 1px !important;
+  }
+
+  .texto-firma-sola {
+    font-size: 6.5px !important;
+    font-weight: 700 !important;
   }
 }
 
