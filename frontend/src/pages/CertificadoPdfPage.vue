@@ -391,10 +391,6 @@
                 • <strong>{{ nov.dependencia }}:</strong> {{ nov.motivo }}
               </div>
             </div>
-            <div v-else class="lineas-puntos-elementos">
-              <div class="linea-punto"></div>
-              <div class="linea-punto"></div>
-            </div>
           </div>
 
           <div class="fila-otros-inf">
@@ -3021,25 +3017,8 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 }
 
 .espacio-elementos {
-  min-height: 44px;
-  padding: 3px 6px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-}
-
-.lineas-puntos-elementos {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 13px;
-  padding: 8px 0 3px;
-}
-
-.linea-punto {
-  border-bottom: 1px solid #000000;
-  width: 100%;
-  height: 1px;
+  min-height: 22px;
+  padding: 2px 6px;
 }
 
 .lista-elementos-pendientes {
@@ -3055,8 +3034,7 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 .fila-otros-inf {
   display: flex;
   align-items: baseline;
-  padding: 3px 6px 6px;
-  min-height: 26px;
+  padding: 2px 6px 6px;
 }
 
 .otros-label {
@@ -3068,7 +3046,7 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
 
 .otros-puntos {
   flex: 1;
-  border-bottom: 1px solid #000000;
+  border-bottom: 1px dotted #000000;
   height: 1px;
   margin-bottom: 2px;
 }
@@ -3286,10 +3264,6 @@ Motivo registrado: "${datosSolicitud.value.observacionRechazo || 'Bienes o reque
   .td-dep,
   .td-nombres {
     font-size: 7.3px !important;
-  }
-
-  .espacio-elementos {
-    min-height: 48px !important;
   }
 
   .zona-firma-inf {
