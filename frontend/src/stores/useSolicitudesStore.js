@@ -183,7 +183,13 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
       if (Array.isArray(lista) && lista.length > 0) {
         const desdeAtlas = lista.map((c, idx) => {
           const num = c.numero_contrato || `CNT-${idx + 1}`
-          const nom = c.nombre_contratista || c.usuario?.nombre_completo || 'Contratista'
+          const nom =
+            c.contratista ||
+            c.nombre_contratista ||
+            c.nombreContratista ||
+            c.usuario?.nombre_completo ||
+            c.usuario?.nombre ||
+            'Contratista'
           const dep =
             c.dependencia?.nombre_dependencia ||
             (typeof c.dependencia === 'string' ? c.dependencia : 'Gestión Tecnológica')
@@ -237,12 +243,16 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
             identificacion: docCon || '',
             contratista: nom,
             nombreContratista: nom,
+            nombre_contratista: nom,
             numeroContrato: num,
+            contrato: num,
             dependencia: dep,
             responsable: sup,
             fecha: fch,
             fechaSolicitud: fch,
             estado: est,
+            creadoPorUsuario: c.usuario?._id || c.usuario || null,
+            creadoEnSesion: true,
             observacionRechazo:
               c.observaciones_supervisor ||
               c.observacion_rechazo ||
@@ -365,6 +375,17 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
       localStorage.setItem(`certificado_identificacion_${doc}`, doc)
     }
 
+    try {
+      const creadas = JSON.parse(sessionStorage.getItem('solicitudes_creadas_sesion') || '[]')
+      creadas.push(num)
+      creadas.push(String(num).toLowerCase().trim())
+      if (nom) creadas.push(String(nom).toLowerCase().trim())
+      if (doc) creadas.push(String(doc).toLowerCase().trim())
+      sessionStorage.setItem('solicitudes_creadas_sesion', JSON.stringify(creadas))
+    } catch {
+      /* noop */
+    }
+
     const solicitudAInsertar = {
       ...nuevaSolicitud,
       id: nuevaSolicitud.numeroSolicitud || num,
@@ -372,8 +393,10 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
         nuevaSolicitud.numeroSolicitud ||
         `SOL-${String(num).replace(/\D/g, '').slice(-4).padStart(4, '0')}`,
       numeroContrato: num,
+      contrato: num,
       contratista: nom,
       nombreContratista: nom,
+      nombre_contratista: nom,
       documentoContratista: doc || '—',
       identificacion: doc,
       dependencia: dep,
@@ -381,6 +404,7 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
       fecha: fch,
       fechaSolicitud: fch,
       estado: est,
+      creadoEnSesion: true,
       firmas: [
         {
           dependenciaCodigo: 'DEP-01',

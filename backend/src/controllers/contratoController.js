@@ -101,17 +101,23 @@ exports.crearContrato = asyncHandler(async (req, res) => {
 
         try {
             const DependenciaArea = require('../models/DependenciaArea');
-            const areasActivas = await DependenciaArea.find({ activo: true });
+            const areasActivas = await DependenciaArea.find({ activo: true }).lean();
+            const firmasExistentes = await TrazabilidadFirma.find({ contrato_id: contratoExistente._id }).distinct('area_id');
+            const existentesSet = new Set(firmasExistentes.map(id => String(id)));
+
+            const nuevasFirmas = [];
             for (const area of areasActivas) {
-                const trazExist = await TrazabilidadFirma.findOne({ contrato_id: contratoExistente._id, area_id: area._id });
-                if (!trazExist) {
-                    await TrazabilidadFirma.create({
+                if (!existentesSet.has(String(area._id))) {
+                    nuevasFirmas.push({
                         contrato_id: contratoExistente._id,
                         area_id: area._id,
                         estado: 'Pendiente',
                         hash_verificacion: ''
                     });
                 }
+            }
+            if (nuevasFirmas.length > 0) {
+                await TrazabilidadFirma.insertMany(nuevasFirmas, { ordered: false });
             }
         } catch (firmaErr) {
             console.warn('Aviso trazabilidad actualización:', firmaErr.message);
@@ -144,46 +150,28 @@ exports.crearContrato = asyncHandler(async (req, res) => {
         contrato_id: nuevoContrato._id
     }));
 
-    // Intentar transacción atómica (requiere replica set en MongoDB)
-    const session = await mongoose.startSession();
-    let creado = false;
-
+    // Inserción directa de alta velocidad (< 200ms)
     try {
-        await session.withTransaction(async () => {
-            await nuevoContrato.save({ session });
-            await BienEntregado.insertMany(bienesConContrato, { session });
-        });
-        creado = true;
-    } catch (txError) {
-        console.warn('Transacción fallida o no soportada, intentando fallback:', txError.message);
-    } finally {
-        try { session.endSession(); } catch (e) { /* noop */ }
-    }
-
-    // Fallback secuencial con compensación manual (standalone)
-    if (!creado) {
-        try {
-            await nuevoContrato.save();
-            await BienEntregado.insertMany(bienesConContrato);
-        } catch (fallbackErr) {
-            await Contrato.findByIdAndDelete(nuevoContrato._id).catch(() => {});
-            throw new AppError('Error interno del servidor al procesar el contrato (fallback).', 500);
+        await nuevoContrato.save();
+        if (bienesConContrato.length > 0) {
+            await BienEntregado.insertMany(bienesConContrato, { ordered: false });
         }
+    } catch (saveErr) {
+        console.error('Error guardando contrato:', saveErr.message);
+        throw new AppError('Error interno al registrar el contrato: ' + saveErr.message, 500);
     }
 
     try {
         const DependenciaArea = require('../models/DependenciaArea');
-        const areasActivas = await DependenciaArea.find({ activo: true });
-        for (const area of areasActivas) {
-            const existe = await TrazabilidadFirma.findOne({ contrato_id: nuevoContrato._id, area_id: area._id });
-            if (!existe) {
-                await TrazabilidadFirma.create({
-                    contrato_id: nuevoContrato._id,
-                    area_id: area._id,
-                    estado: 'Pendiente',
-                    hash_verificacion: ''
-                });
-            }
+        const areasActivas = await DependenciaArea.find({ activo: true }).lean();
+        if (areasActivas.length > 0) {
+            const firmasAInsertar = areasActivas.map(area => ({
+                contrato_id: nuevoContrato._id,
+                area_id: area._id,
+                estado: 'Pendiente',
+                hash_verificacion: ''
+            }));
+            await TrazabilidadFirma.insertMany(firmasAInsertar, { ordered: false });
         }
     } catch (firmaErr) {
         console.warn('Aviso: No se pudieron generar todos los casilleros de firma automáticos:', firmaErr.message);
@@ -193,7 +181,7 @@ exports.crearContrato = asyncHandler(async (req, res) => {
         usuario_id: usuarioId,
         accion: 'CREAR_CONTRATO',
         entidad_afectada: 'contratos_gccon_f088',
-        detalles: { contrato_id: nuevoContrato._id, numero_contrato: numero, modo: creado ? 'transaccion' : 'fallback' }
+        detalles: { contrato_id: nuevoContrato._id, numero_contrato: numero, modo: 'optimizacion_directa' }
     });
 
     res.status(201).json({
@@ -270,6 +258,11 @@ exports.listarContratos = asyncHandler(async (req, res) => {
         if (obj.estado !== 'Firmado' && obj.estado !== 'Finalizado' && obj.estado !== 'Rechazado') {
             obj.estado = 'En revisión';
         }
+        const nomCont = c.nombre_contratista || c.usuario?.nombre_completo || c.usuario?.nombre || 'Contratista';
+        obj.nombre_contratista = nomCont;
+        obj.contratista = nomCont;
+        obj.nombreContratista = nomCont;
+
         const docResuelto = c.documento_contratista || c.usuario?.documento || '';
         obj.documento_contratista = docResuelto;
         obj.identificacion = docResuelto;

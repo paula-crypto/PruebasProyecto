@@ -700,12 +700,28 @@ const rows = computed(() => {
     const miContrato = normalizarTexto(u.numeroContrato || u.contrato)
     const miId = String(u.id || u._id || '').trim()
 
+    let creadasSesion = []
+    try {
+      creadasSesion = JSON.parse(sessionStorage.getItem('solicitudes_creadas_sesion') || '[]')
+    } catch {
+      creadasSesion = []
+    }
+    const setCreadas = new Set(creadasSesion.map((x) => normalizarTexto(x)))
+
     return lista.filter((s) => {
-      const nom = normalizarTexto(s.contratista || s.nombreContratista)
+      const con = normalizarTexto(s.numeroContrato || s.contrato)
+      const sol = normalizarTexto(s.numeroSolicitud || s.solicitud)
+      const id = normalizarTexto(s._id || s.id)
+      const nom = normalizarTexto(s.contratista || s.nombreContratista || s.nombre_contratista)
+
+      // SI LA SOLICITUD FUE CREADA POR ESTE USUARIO O REGISTRADA EN ESTA SESIÓN: ¡SIEMPRE VISIBLE!
+      if (s.creadoEnSesion || setCreadas.has(con) || setCreadas.has(sol) || setCreadas.has(id) || (nom && setCreadas.has(nom))) {
+        return true
+      }
+
       const doc = String(s.documentoContratista || s.identificacion || s.documento || '').trim()
       const cor = normalizarTexto(s.correo || s.correoContratista)
-      const con = normalizarTexto(s.numeroContrato || s.contrato)
-      const conId = String(s.contratista_id || s.usuario_id || s.usuario?._id || '').trim()
+      const conId = String(s.contratista_id || s.usuario_id || s.usuario?._id || s.usuario || s.creadoPorUsuario || '').trim()
 
       if (miDocumento && doc && miDocumento === doc) return true
       if (miId && conId && miId === conId) return true
@@ -786,21 +802,31 @@ const columns = [
   {
     name: 'numeroContrato',
     label: 'Contrato',
-    field: (row) => row.numeroContrato || row.contrato || 'N/A',
+    field: (row) => row.numeroContrato || row.contrato || row.numero_contrato || 'N/A',
     align: 'left',
     sortable: true,
   },
   {
     name: 'contratista',
     label: 'Contratista',
-    field: (row) => row.contratista || row.nombreContratista || 'N/A',
+    field: (row) =>
+      row.contratista ||
+      row.nombreContratista ||
+      row.nombre_contratista ||
+      row.usuario?.nombre_completo ||
+      row.usuario?.nombre ||
+      'Contratista',
     align: 'left',
     sortable: true,
   },
   {
     name: 'dependencia',
     label: 'Dependencia',
-    field: (row) => row.dependencia || row.nombreDependencia || 'N/A',
+    field: (row) =>
+      row.dependencia?.nombre_dependencia ||
+      row.dependencia ||
+      row.nombreDependencia ||
+      'Gestión Tecnológica',
     align: 'left',
     sortable: true,
   },
@@ -1070,6 +1096,22 @@ async function guardarSolicitud() {
         await store.agregarSolicitud({ ...solicitud.value })
       } else if (Array.isArray(store.solicitudes)) {
         store.solicitudes.push({ ...solicitud.value })
+      }
+      try {
+        const num = solicitud.value.numeroContrato || ''
+        const nom = solicitud.value.contratista || ''
+        const creadas = JSON.parse(sessionStorage.getItem('solicitudes_creadas_sesion') || '[]')
+        if (num) {
+          creadas.push(num)
+          creadas.push(num.toLowerCase().trim())
+        }
+        if (nom) {
+          creadas.push(nom)
+          creadas.push(nom.toLowerCase().trim())
+        }
+        sessionStorage.setItem('solicitudes_creadas_sesion', JSON.stringify(creadas))
+      } catch {
+        /* noop */
       }
       $q.notify({
         type: 'positive',
