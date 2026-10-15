@@ -55,10 +55,26 @@
       bordered
       :loading="store.cargando"
       :rows-per-page-options="[10, 25, 50, 0]"
-      :pagination="{ rowsPerPage: 25 }"
+      v-model:pagination="paginationTable"
       no-data-label="No hay solicitudes registradas"
       no-results-label="No se encontraron coincidencias"
     >
+      <!-- Celda Número de Solicitud con badge si es recién creada -->
+      <template #body-cell-numeroSolicitud="props">
+        <q-td :props="props">
+          <div class="row items-center no-wrap">
+            <span class="text-weight-bold">{{ props.value }}</span>
+            <q-badge
+              v-if="esRecienCreada(props.row)"
+              color="teal-7"
+              text-color="white"
+              label="Nueva"
+              class="q-ml-xs text-caption text-weight-bold"
+            />
+          </div>
+        </q-td>
+      </template>
+
       <!-- Badge de Estado -->
       <template #body-cell-estado="props">
         <q-td :props="props" class="text-center">
@@ -624,6 +640,83 @@ const formRef = ref(null)
 const filtro = ref('')
 const dialogo = ref(false)
 const dialogoEstado = ref(false)
+const paginationTable = ref({
+  page: 1,
+  rowsPerPage: 25,
+  sortBy: null,
+  descending: false,
+})
+
+function esRecienCreada(row) {
+  if (!row) return false
+  if (row.recienCreada) return true
+  try {
+    const con = normalizarTexto(row.numeroContrato || row.contrato)
+    const sol = normalizarTexto(row.numeroSolicitud || row.solicitud)
+    const id = normalizarTexto(row._id || row.id)
+    const creadas = JSON.parse(sessionStorage.getItem('solicitudes_creadas_sesion') || '[]')
+    return creadas.some((c) => {
+      const nc = normalizarTexto(c)
+      return nc && (nc === con || nc === sol || nc === id)
+    })
+  } catch {
+    return false
+  }
+}
+
+function ordenarPorMasReciente(lista) {
+  let creadasOrden = []
+  try {
+    creadasOrden = JSON.parse(sessionStorage.getItem('solicitudes_creadas_orden') || '[]')
+  } catch {
+    creadasOrden = []
+  }
+
+  const mapaTs = new Map()
+  creadasOrden.forEach((item, index) => {
+    const c = typeof item === 'string' ? item : item?.clave
+    const t = typeof item === 'object' && item?.ts ? item.ts : Date.now() - index * 1000
+    if (c) mapaTs.set(normalizarTexto(c), t)
+  })
+
+  return [...lista].sort((a, b) => {
+    const aCon = normalizarTexto(a.numeroContrato || a.contrato)
+    const aSol = normalizarTexto(a.numeroSolicitud || a.solicitud)
+    const aId = normalizarTexto(a._id || a.id)
+
+    const bCon = normalizarTexto(b.numeroContrato || b.contrato)
+    const bSol = normalizarTexto(b.numeroSolicitud || b.solicitud)
+    const bId = normalizarTexto(b._id || b.id)
+
+    const aRecienteTs =
+      (a.recienCreada && a.timestampCreacion) ||
+      mapaTs.get(aCon) ||
+      mapaTs.get(aSol) ||
+      mapaTs.get(aId) ||
+      (esRecienCreada(a) ? 1 : 0)
+
+    const bRecienteTs =
+      (b.recienCreada && b.timestampCreacion) ||
+      mapaTs.get(bCon) ||
+      mapaTs.get(bSol) ||
+      mapaTs.get(bId) ||
+      (esRecienCreada(b) ? 1 : 0)
+
+    // Si uno fue recién creado en sesión y el otro no:
+    if (aRecienteTs && !bRecienteTs) return -1
+    if (!aRecienteTs && bRecienteTs) return 1
+    if (aRecienteTs && bRecienteTs && aRecienteTs !== bRecienteTs) {
+      return bRecienteTs - aRecienteTs
+    }
+
+    // Ordenar por fecha o createdAt más reciente
+    const fA = new Date(a.createdAt || a.fechaSolicitud || a.fecha || 0).getTime()
+    const fB = new Date(b.createdAt || b.fechaSolicitud || b.fecha || 0).getTime()
+    if (fB !== fA) return fB - fA
+
+    return 0
+  })
+}
 
 const editando = ref(false)
 const codigoEditar = ref(null)
@@ -687,7 +780,7 @@ function abrirModalNovedades(fila) {
 
 const rows = computed(() => {
   const lista = store.solicitudes || []
-  if (!auth.usuario) return lista
+  if (!auth.usuario) return ordenarPorMasReciente(lista)
 
   const rol = (auth.rolUsuario || '').toUpperCase()
 
@@ -708,14 +801,14 @@ const rows = computed(() => {
     }
     const setCreadas = new Set(creadasSesion.map((x) => normalizarTexto(x)))
 
-    return lista.filter((s) => {
+    const filtradas = lista.filter((s) => {
       const con = normalizarTexto(s.numeroContrato || s.contrato)
       const sol = normalizarTexto(s.numeroSolicitud || s.solicitud)
       const id = normalizarTexto(s._id || s.id)
       const nom = normalizarTexto(s.contratista || s.nombreContratista || s.nombre_contratista)
 
       // SI LA SOLICITUD FUE CREADA POR ESTE USUARIO O REGISTRADA EN ESTA SESIÓN: ¡SIEMPRE VISIBLE!
-      if (s.creadoEnSesion || setCreadas.has(con) || setCreadas.has(sol) || setCreadas.has(id) || (nom && setCreadas.has(nom))) {
+      if (s.creadoEnSesion || s.recienCreada || setCreadas.has(con) || setCreadas.has(sol) || setCreadas.has(id) || (nom && setCreadas.has(nom))) {
         return true
       }
 
@@ -731,6 +824,7 @@ const rows = computed(() => {
 
       return false
     })
+    return ordenarPorMasReciente(filtradas)
   }
 
   // 2. Si es SUPERVISOR: Solo debe ver las solicitudes asignadas a su supervisión
@@ -740,7 +834,7 @@ const rows = computed(() => {
     const miCorreo = normalizarTexto(u.correo || u.correo_institucional)
     const miDep = normalizarTexto(u.dependencia)
 
-    return lista.filter((s) => {
+    const filtradas = lista.filter((s) => {
       const resp = normalizarTexto(s.responsable || s.supervisor)
       const dep = normalizarTexto(s.dependencia)
       const cor = normalizarTexto(s.correoSupervisor || s.correo_supervisor)
@@ -751,6 +845,7 @@ const rows = computed(() => {
 
       return false
     })
+    return ordenarPorMasReciente(filtradas)
   }
 
   // 3. Si es RESPONSABLE_AREA: ve solicitudes de su área / pendientes de firma
@@ -769,13 +864,13 @@ const rows = computed(() => {
         }
         return false
       })
-      if (filtradas.length > 0) return filtradas
+      if (filtradas.length > 0) return ordenarPorMasReciente(filtradas)
     }
-    return lista
+    return ordenarPorMasReciente(lista)
   }
 
   // 4. Si es ADMINISTRADOR: ve todas las solicitudes
-  return lista
+  return ordenarPorMasReciente(lista)
 })
 
 const solicitud = ref({
@@ -1095,7 +1190,12 @@ async function guardarSolicitud() {
       if (typeof store.agregarSolicitud === 'function') {
         await store.agregarSolicitud({ ...solicitud.value })
       } else if (Array.isArray(store.solicitudes)) {
-        store.solicitudes.push({ ...solicitud.value })
+        store.solicitudes.unshift({
+          ...solicitud.value,
+          recienCreada: true,
+          timestampCreacion: Date.now(),
+          createdAt: new Date().toISOString(),
+        })
       }
       try {
         const num = solicitud.value.numeroContrato || ''
@@ -1110,9 +1210,15 @@ async function guardarSolicitud() {
           creadas.push(nom.toLowerCase().trim())
         }
         sessionStorage.setItem('solicitudes_creadas_sesion', JSON.stringify(creadas))
+
+        const creadasOrden = JSON.parse(sessionStorage.getItem('solicitudes_creadas_orden') || '[]')
+        if (num) creadasOrden.unshift({ clave: num, ts: Date.now() })
+        sessionStorage.setItem('solicitudes_creadas_orden', JSON.stringify(creadasOrden))
       } catch {
         /* noop */
       }
+      paginationTable.value.page = 1
+      filtro.value = ''
       $q.notify({
         type: 'positive',
         message: 'Solicitud registrada correctamente en MongoDB Atlas.',

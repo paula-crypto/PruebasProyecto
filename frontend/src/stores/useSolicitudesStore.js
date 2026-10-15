@@ -250,9 +250,20 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
             responsable: sup,
             fecha: fch,
             fechaSolicitud: fch,
+            createdAt: c.createdAt || new Date().toISOString(),
+            updatedAt: c.updatedAt || new Date().toISOString(),
             estado: est,
             creadoPorUsuario: c.usuario?._id || c.usuario || null,
             creadoEnSesion: true,
+            recienCreada: (() => {
+              try {
+                const orden = JSON.parse(sessionStorage.getItem('solicitudes_creadas_orden') || '[]')
+                const n = String(num).toLowerCase().trim()
+                return orden.some((o) => String(typeof o === 'string' ? o : o?.clave).toLowerCase().trim() === n)
+              } catch {
+                return false
+              }
+            })(),
             observacionRechazo:
               c.observaciones_supervisor ||
               c.observacion_rechazo ||
@@ -344,6 +355,36 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
           }
         }
 
+        // Ordenar lista única: recién creadas en sesión van arriba de todo, luego por fecha más reciente
+        listaUnica.sort((a, b) => {
+          let creadasOrden = []
+          try {
+            creadasOrden = JSON.parse(sessionStorage.getItem('solicitudes_creadas_orden') || '[]')
+          } catch {
+            creadasOrden = []
+          }
+          const mapaTs = new Map()
+          creadasOrden.forEach((item, index) => {
+            const c = typeof item === 'string' ? item : item?.clave
+            const t = typeof item === 'object' && item?.ts ? item.ts : (Date.now() - index * 1000)
+            if (c) mapaTs.set(String(c).toLowerCase().trim(), t)
+          })
+
+          const aCon = String(a.numeroContrato || a.contrato || '').toLowerCase().trim()
+          const bCon = String(b.numeroContrato || b.contrato || '').toLowerCase().trim()
+
+          const aTs = (a.recienCreada && a.timestampCreacion) || mapaTs.get(aCon) || 0
+          const bTs = (b.recienCreada && b.timestampCreacion) || mapaTs.get(bCon) || 0
+
+          if (aTs && !bTs) return -1
+          if (!aTs && bTs) return 1
+          if (aTs && bTs && aTs !== bTs) return bTs - aTs
+
+          const fA = new Date(a.createdAt || a.fechaSolicitud || a.fecha || 0).getTime()
+          const fB = new Date(b.createdAt || b.fechaSolicitud || b.fecha || 0).getTime()
+          return fB - fA
+        })
+
         solicitudes.value = listaUnica
       }
     } catch (err) {
@@ -382,10 +423,16 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
       if (nom) creadas.push(String(nom).toLowerCase().trim())
       if (doc) creadas.push(String(doc).toLowerCase().trim())
       sessionStorage.setItem('solicitudes_creadas_sesion', JSON.stringify(creadas))
+
+      const creadasOrden = JSON.parse(sessionStorage.getItem('solicitudes_creadas_orden') || '[]')
+      creadasOrden.unshift({ clave: num, ts: Date.now() })
+      sessionStorage.setItem('solicitudes_creadas_orden', JSON.stringify(creadasOrden))
     } catch {
       /* noop */
     }
 
+    const ahoraIso = new Date().toISOString()
+    const ahoraTs = Date.now()
     const solicitudAInsertar = {
       ...nuevaSolicitud,
       id: nuevaSolicitud.numeroSolicitud || num,
@@ -403,8 +450,12 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
       responsable: sup,
       fecha: fch,
       fechaSolicitud: fch,
+      createdAt: ahoraIso,
+      updatedAt: ahoraIso,
+      timestampCreacion: ahoraTs,
       estado: est,
       creadoEnSesion: true,
+      recienCreada: true,
       firmas: [
         {
           dependenciaCodigo: 'DEP-01',
