@@ -26,66 +26,6 @@
 
       <!-- Lado Derecho: Acciones principales con estilo homogéneo, espaciadas y legibles -->
       <div class="toolbar-right row items-center q-gutter-md no-wrap">
-        <q-btn
-          v-if="
-            miFilaParaFirmar &&
-            datosSolicitud.estado !== 'Rechazado' &&
-            !firmasTabla[miFilaParaFirmar.id]
-          "
-          unelevated
-          dense
-          color="blue-8"
-          icon="history_edu"
-          :label="'Firmar ' + (miFilaParaFirmar.id === 14 ? 'Supervisión' : 'Mi Área')"
-          class="q-px-md text-weight-bold"
-          @click="abrirModalFirmaFila(miFilaParaFirmar)"
-        >
-          <q-tooltip
-            >Estampar tu firma oficial en
-            {{ miFilaParaFirmar.dependencia.replace(/<[^>]*>/g, ' ') }}</q-tooltip
-          >
-        </q-btn>
-        <q-btn
-          v-if="
-            miFilaParaFirmar &&
-            datosSolicitud.estado !== 'Rechazado' &&
-            firmasTabla[miFilaParaFirmar.id]
-          "
-          flat
-          dense
-          color="grey-7"
-          icon="close"
-          class="q-px-xs"
-          @click="limpiarMiFirma"
-        >
-          <q-tooltip>Borrar firma de mi área</q-tooltip>
-        </q-btn>
-
-        <!-- Botón Firmar para Contratista (Exclusivo para el Contratista en su recuadro final) -->
-        <q-btn
-          v-if="esContratista && datosSolicitud.estado !== 'Rechazado' && !firmaGuardada"
-          unelevated
-          dense
-          color="positive"
-          icon="draw"
-          label="Firmar como Contratista"
-          class="q-px-md text-weight-bold shadow-1"
-          @click="abrirModalFirma"
-        >
-          <q-tooltip>Estampar la firma del contratista en el certificado</q-tooltip>
-        </q-btn>
-        <q-btn
-          v-if="esContratista && datosSolicitud.estado !== 'Rechazado' && firmaGuardada"
-          flat
-          dense
-          color="grey-7"
-          icon="close"
-          class="q-px-xs"
-          @click="limpiarFirma"
-        >
-          <q-tooltip>Borrar firma del contratista</q-tooltip>
-        </q-btn>
-
         <!-- Botón Plantilla y Firmantes: Alta visibilidad, exclusivo para Supervisor y Admin -->
         <q-btn
           v-if="!esContratista"
@@ -1651,37 +1591,6 @@ function puedeFirmarFila(fila) {
   }
 
   return false
-}
-
-const miFilaParaFirmar = computed(() => {
-  return filasDependencias.value.find((f) => puedeFirmarFila(f)) || null
-})
-
-function limpiarMiFirma() {
-  if (miFilaParaFirmar.value) {
-    delete firmasTabla.value[miFilaParaFirmar.value.id]
-    const codigo = route.query.codigo || route.params.id
-    if (codigo) {
-      localStorage.setItem(`firmas_tabla_${codigo}`, JSON.stringify(firmasTabla.value))
-    }
-    $q.notify({
-      type: 'info',
-      message: 'Firma de tu área removida.',
-    })
-  }
-}
-
-function limpiarFirma() {
-  firmaGuardada.value = null
-  const codigo = route.query.codigo || route.params.id
-  if (codigo) {
-    localStorage.removeItem(`firma_${codigo}`)
-  }
-  localStorage.removeItem('ultima_firma')
-  $q.notify({
-    type: 'info',
-    message: 'Firma de contratista removida.',
-  })
 }
 
 function abrirModalFirmaFila(fila) {
