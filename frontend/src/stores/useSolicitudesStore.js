@@ -10,9 +10,13 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
       documentoContratista: '1098765432',
       contratista: 'Juan Carlos Pérez Gómez',
       nombreContratista: 'Juan Carlos Pérez Gómez',
+      correo: 'juan.perez@correo.com',
+      correoContratista: 'juan.perez@correo.com',
       numeroContrato: 'CNT-2025-088',
       dependencia: 'Gestión Tecnológica',
       responsable: 'Ing. Carlos Supervisor',
+      supervisor: 'Ing. Carlos Supervisor',
+      correoSupervisor: 'supervisor@gccon.com',
       fecha: '2026-08-15',
       fechaSolicitud: '2026-08-15',
       estado: 'En revisión',
@@ -43,9 +47,13 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
       documentoContratista: '1095432189',
       contratista: 'Laura Andrea Contratista',
       nombreContratista: 'Laura Andrea Contratista',
+      correo: 'contratista@gccon.com',
+      correoContratista: 'contratista@gccon.com',
       numeroContrato: 'CNT-2026-014',
       dependencia: 'Almacén e Inventarios',
-      responsable: 'Lic. Martha Almacén',
+      responsable: 'Ing. Carlos Supervisor',
+      supervisor: 'Ing. Carlos Supervisor',
+      correoSupervisor: 'supervisor@gccon.com',
       fecha: '2026-09-02',
       fechaSolicitud: '2026-09-02',
       estado: 'Firmado',
@@ -76,9 +84,13 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
       documentoContratista: '1094321765',
       contratista: 'María Fernanda Gómez Ruiz',
       nombreContratista: 'María Fernanda Gómez Ruiz',
+      correo: 'maria.gomez@correo.com',
+      correoContratista: 'maria.gomez@correo.com',
       numeroContrato: 'CNT-2026-029',
       dependencia: 'Recursos Humanos',
       responsable: 'Dra. Ana María Gómez',
+      supervisor: 'Dra. Ana María Gómez',
+      correoSupervisor: 'agomez@sena.edu.co',
       fecha: '2026-09-10',
       fechaSolicitud: '2026-09-10',
       estado: 'Rechazado',
@@ -116,9 +128,13 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
       documentoContratista: '1097890123',
       contratista: 'Carlos Eduardo Mendoza',
       nombreContratista: 'Carlos Eduardo Mendoza',
+      correo: 'carlos.mendoza@email.com',
+      correoContratista: 'carlos.mendoza@email.com',
       numeroContrato: 'CNT-2026-042',
       dependencia: 'Gestión Tecnológica',
       responsable: 'Ing. Carlos Supervisor',
+      supervisor: 'Ing. Carlos Supervisor',
+      correoSupervisor: 'supervisor@gccon.com',
       fecha: '2026-09-12',
       fechaSolicitud: '2026-09-12',
       estado: 'Finalizado',
@@ -149,9 +165,13 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
       documentoContratista: '1096543210',
       contratista: 'Diego Morales Castro',
       nombreContratista: 'Diego Morales Castro',
+      correo: 'diego.morales@correo.com',
+      correoContratista: 'diego.morales@correo.com',
       numeroContrato: 'CNT-2026-055',
       dependencia: 'Infraestructura y Servicios Generales',
       responsable: 'Ing. Fernando Ramírez',
+      supervisor: 'Ing. Fernando Ramírez',
+      correoSupervisor: 'f.ramirez@sena.edu.co',
       fecha: '2026-09-15',
       fechaSolicitud: '2026-09-15',
       estado: 'En revisión',
@@ -193,7 +213,33 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
           const dep =
             c.dependencia?.nombre_dependencia ||
             (typeof c.dependencia === 'string' ? c.dependencia : 'Gestión Tecnológica')
-          const sup = c.supervisor?.nombre_completo || 'Supervisor Asignado'
+
+          let sup = c.supervisor?.nombre_completo || c.responsable || ''
+          let supCorreo = c.supervisor?.correo_institucional || ''
+          let supId = c.supervisor?._id || c.supervisor_id || null
+
+          if (!sup || sup === 'Supervisor Asignado' || sup === 'SIN SUPERVISOR') {
+            const contratistasConfig = [
+              { nombre: 'Juan Carlos Pérez', sup: 'Ing. Carlos Supervisor', correoSup: 'supervisor@gccon.com' },
+              { nombre: 'Laura Andrea Contratista', sup: 'Ing. Carlos Supervisor', correoSup: 'supervisor@gccon.com' },
+              { nombre: 'Carlos Eduardo Mendoza', sup: 'Ing. Carlos Supervisor', correoSup: 'supervisor@gccon.com' },
+              { nombre: 'María Fernanda Gómez', sup: 'Dra. Ana María Gómez', correoSup: 'agomez@sena.edu.co' },
+              { nombre: 'Diego Morales Castro', sup: 'Ing. Fernando Ramírez', correoSup: 'f.ramirez@sena.edu.co' },
+            ]
+            const match = contratistasConfig.find(
+              (cc) =>
+                nom.toLowerCase().includes(cc.nombre.toLowerCase()) ||
+                cc.nombre.toLowerCase().includes(nom.toLowerCase()),
+            )
+            if (match) {
+              sup = match.sup
+              supCorreo = match.correoSup
+            } else {
+              sup = 'Ing. Carlos Supervisor'
+              supCorreo = 'supervisor@gccon.com'
+            }
+          }
+
           const fch = c.createdAt
             ? new Date(c.createdAt).toISOString().split('T')[0]
             : new Date().toISOString().split('T')[0]
@@ -244,17 +290,22 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
             contratista: nom,
             nombreContratista: nom,
             nombre_contratista: nom,
+            correo: c.correo_contratista || c.usuario?.correo_institucional || '',
+            correoContratista: c.correo_contratista || c.usuario?.correo_institucional || '',
             numeroContrato: num,
             contrato: num,
             dependencia: dep,
             responsable: sup,
+            supervisor: sup,
+            correoSupervisor: supCorreo,
+            supervisor_id: supId,
             fecha: fch,
             fechaSolicitud: fch,
             createdAt: c.createdAt || new Date().toISOString(),
             updatedAt: c.updatedAt || new Date().toISOString(),
             estado: est,
             creadoPorUsuario: c.usuario?._id || c.usuario || null,
-            creadoEnSesion: true,
+            creadoEnSesion: false,
             recienCreada: (() => {
               try {
                 const orden = JSON.parse(sessionStorage.getItem('solicitudes_creadas_orden') || '[]')
@@ -477,6 +528,8 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
         documento: doc,
         telefono: nuevaSolicitud.telefono || '3001234567',
         dependencia: dep,
+        supervisor: sup,
+        responsable: sup,
         estado: est,
         bienes: [
           {

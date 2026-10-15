@@ -47,7 +47,7 @@ async function resolverDependencia(valor) {
 
 // Diagrama 2: Registro contractual e inventario (transacción atómica + fallback)
 exports.crearContrato = asyncHandler(async (req, res) => {
-    const { numero, telefono, dependencia, bienes, contratista, nombre_contratista, estado, documento_contratista, identificacion, documento } = req.body;
+    const { numero, telefono, dependencia, bienes, contratista, nombre_contratista, estado, documento_contratista, identificacion, documento, supervisor, responsable } = req.body;
 
     const usuarioId = req.usuario?.id || req.usuario?._id || req.usuario?.uid;
     if (!usuarioId) {
@@ -88,6 +88,26 @@ exports.crearContrato = asyncHandler(async (req, res) => {
     const nombreFinal = contratista || nombre_contratista || req.usuario?.nombre || req.usuario?.nombre_completo || 'Contratista';
     const docFinal = documento_contratista || identificacion || documento || req.usuario?.documento || '';
 
+    // Resolver ID de supervisor si viene por nombre o correo
+    let supervisorId = req.usuario?.supervisor_id || null;
+    const supBuscado = supervisor || responsable;
+    if (!supervisorId && supBuscado) {
+        const Usuario = require('../models/Usuario');
+        if (mongoose.isValidObjectId(supBuscado)) {
+            supervisorId = supBuscado;
+        } else {
+            const regexSup = new RegExp(String(supBuscado).replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'), 'i');
+            const supObj = await Usuario.findOne({
+                rol: { $regex: /super/i },
+                $or: [
+                    { nombre_completo: regexSup },
+                    { correo_institucional: String(supBuscado).toLowerCase().trim() }
+                ]
+            });
+            if (supObj) supervisorId = supObj._id;
+        }
+    }
+
     // Si el número de contrato ya existe, actualizarlo para garantizar la persistencia del nombre y evitar colisiones
     const contratoExistente = await Contrato.findOne({ numero_contrato: numero });
     if (contratoExistente) {
@@ -96,6 +116,7 @@ exports.crearContrato = asyncHandler(async (req, res) => {
         contratoExistente.telefono = telefono || contratoExistente.telefono;
         if (docFinal) contratoExistente.documento_contratista = docFinal;
         contratoExistente.dependencia = dependenciaArea._id;
+        if (supervisorId) contratoExistente.supervisor = supervisorId;
         contratoExistente.estado = 'En revisión';
         await contratoExistente.save();
 
@@ -137,7 +158,7 @@ exports.crearContrato = asyncHandler(async (req, res) => {
         documento_contratista: docFinal,
         dependencia: dependenciaArea._id,
         usuario: usuarioId,
-        supervisor: req.usuario?.supervisor_id || null,
+        supervisor: supervisorId,
         estado: estado || 'En revisión',
         version_formato: versionFormato
     });
@@ -217,9 +238,23 @@ exports.listarContratos = asyncHandler(async (req, res) => {
     let filtro = {};
 
     if (rol === 'Supervisor') {
-        filtro = { supervisor: usuarioId };
+        const Usuario = require('../models/Usuario');
+        const contratistasAsignados = await Usuario.find({ supervisor_id: usuarioId }).distinct('_id');
+        const condiciones = [{ supervisor: usuarioId }];
+        if (contratistasAsignados.length > 0) {
+            condiciones.push({ usuario: { $in: contratistasAsignados } });
+        }
+        filtro = { $or: condiciones };
     } else if (rol === 'Contratista') {
-        filtro = { $or: [{ usuario: usuarioId }, { correo_contratista: req.usuario?.correo || req.usuario?.correo_institucional }] };
+        const condiciones = [];
+        if (usuarioId) condiciones.push({ usuario: usuarioId });
+        const cor = req.usuario?.correo || req.usuario?.correo_institucional;
+        if (cor) condiciones.push({ correo_contratista: cor.toLowerCase().trim() });
+        const nom = req.usuario?.nombre || req.usuario?.nombre_completo;
+        if (nom) {
+            condiciones.push({ nombre_contratista: { $regex: new RegExp(nom.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'), 'i') } });
+        }
+        filtro = condiciones.length > 0 ? { $or: condiciones } : { usuario: usuarioId };
     } else if (rol === 'ResponsableArea') {
         let dependencia_id = req.usuario?.dependencia_id;
         if (!dependencia_id) {

@@ -795,7 +795,8 @@ const rows = computed(() => {
 
     let creadasSesion = []
     try {
-      creadasSesion = JSON.parse(sessionStorage.getItem('solicitudes_creadas_sesion') || '[]')
+      const claveUser = String(u.id || u._id || u.correo || 'default').trim()
+      creadasSesion = JSON.parse(sessionStorage.getItem(`solicitudes_creadas_${claveUser}`) || '[]')
     } catch {
       creadasSesion = []
     }
@@ -806,16 +807,16 @@ const rows = computed(() => {
       const sol = normalizarTexto(s.numeroSolicitud || s.solicitud)
       const id = normalizarTexto(s._id || s.id)
       const nom = normalizarTexto(s.contratista || s.nombreContratista || s.nombre_contratista)
-
-      // SI LA SOLICITUD FUE CREADA POR ESTE USUARIO O REGISTRADA EN ESTA SESIÓN: ¡SIEMPRE VISIBLE!
-      if (s.creadoEnSesion || s.recienCreada || setCreadas.has(con) || setCreadas.has(sol) || setCreadas.has(id) || (nom && setCreadas.has(nom))) {
-        return true
-      }
-
       const doc = String(s.documentoContratista || s.identificacion || s.documento || '').trim()
       const cor = normalizarTexto(s.correo || s.correoContratista)
       const conId = String(s.contratista_id || s.usuario_id || s.usuario?._id || s.usuario || s.creadoPorUsuario || '').trim()
 
+      // Si fue creada por este mismo contratista en esta sesión:
+      if (setCreadas.has(con) || setCreadas.has(sol) || setCreadas.has(id)) {
+        return true
+      }
+
+      // Si pertenece a este contratista:
       if (miDocumento && doc && miDocumento === doc) return true
       if (miId && conId && miId === conId) return true
       if (miCorreo && cor && miCorreo === cor) return true
@@ -832,16 +833,30 @@ const rows = computed(() => {
     const u = auth.usuario
     const miNombre = normalizarTexto(u.nombre || u.nombre_completo)
     const miCorreo = normalizarTexto(u.correo || u.correo_institucional)
-    const miDep = normalizarTexto(u.dependencia)
+    const miId = String(u.id || u._id || '').trim()
 
     const filtradas = lista.filter((s) => {
       const resp = normalizarTexto(s.responsable || s.supervisor)
-      const dep = normalizarTexto(s.dependencia)
+      const supId = String(s.supervisor_id || s.supervisor?._id || '').trim()
       const cor = normalizarTexto(s.correoSupervisor || s.correo_supervisor)
 
+      // Coincidencia directa por nombre, correo o ID de supervisor
       if (miNombre && resp && (resp.includes(miNombre) || miNombre.includes(resp))) return true
       if (miCorreo && cor && miCorreo === cor) return true
-      if (miDep && dep && (dep.includes(miDep) || miDep.includes(dep))) return true
+      if (miId && supId && miId === supId) return true
+
+      // Coincidencia a través de los contratistas asignados a este supervisor
+      const nomCont = normalizarTexto(s.contratista || s.nombreContratista || s.nombre_contratista)
+      const matchCont = (contratistasStore.contratistas || []).find((c) => {
+        const nc = normalizarTexto(c.nombre)
+        return nc && (nc.includes(nomCont) || nomCont.includes(nc))
+      })
+      if (matchCont?.supervisor) {
+        const supDeCont = normalizarTexto(matchCont.supervisor)
+        if (miNombre && supDeCont && (supDeCont.includes(miNombre) || miNombre.includes(supDeCont))) {
+          return true
+        }
+      }
 
       return false
     })
@@ -1200,7 +1215,11 @@ async function guardarSolicitud() {
       try {
         const num = solicitud.value.numeroContrato || ''
         const nom = solicitud.value.contratista || ''
-        const creadas = JSON.parse(sessionStorage.getItem('solicitudes_creadas_sesion') || '[]')
+        const u = auth.usuario || {}
+        const claveUser = String(u.id || u._id || u.correo || 'default').trim()
+        const keySesion = `solicitudes_creadas_${claveUser}`
+
+        const creadas = JSON.parse(sessionStorage.getItem(keySesion) || '[]')
         if (num) {
           creadas.push(num)
           creadas.push(num.toLowerCase().trim())
@@ -1209,7 +1228,7 @@ async function guardarSolicitud() {
           creadas.push(nom)
           creadas.push(nom.toLowerCase().trim())
         }
-        sessionStorage.setItem('solicitudes_creadas_sesion', JSON.stringify(creadas))
+        sessionStorage.setItem(keySesion, JSON.stringify(creadas))
 
         const creadasOrden = JSON.parse(sessionStorage.getItem('solicitudes_creadas_orden') || '[]')
         if (num) creadasOrden.unshift({ clave: num, ts: Date.now() })

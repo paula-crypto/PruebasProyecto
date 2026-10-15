@@ -406,13 +406,21 @@ export const useAuthStore = defineStore('auth', () => {
     sessionStorage.removeItem('gccon_user')
     sessionStorage.removeItem('auth_token')
     sessionStorage.removeItem('token')
+    sessionStorage.removeItem('solicitudes_creadas_sesion')
+    sessionStorage.removeItem('solicitudes_creadas_orden')
     try {
+      // Limpiar claves creadas de sesión por usuario
+      Object.keys(sessionStorage).forEach((k) => {
+        if (k.startsWith('solicitudes_creadas_')) {
+          sessionStorage.removeItem(k)
+        }
+      })
       document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
       document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
       document.cookie = 'session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
       document.cookie = 'gccon_user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-    } catch (e) {
-      console.warn('Error al limpiar cookies:', e)
+    } catch {
+      /* noop */
     }
   }
 
