@@ -279,8 +279,12 @@
                   dense
                   v-model="solicitud.numeroContrato"
                   label="Número de Contrato (por año) *"
-                  :rules="[(val) => !!val || 'El número de contrato es obligatorio']"
-                  hint="Ej. CNT-2026-014 (varía por año)"
+                  :rules="[
+                    (val) => !!val || 'El número de contrato es obligatorio',
+                    (val) => validarNumeroContratoUnico(val),
+                  ]"
+                  @update:model-value="alCambiarNumeroContrato"
+                  hint="Ej. CNT-2026-056 (cada contrato debe ser único)"
                 >
                   <template #prepend>
                     <q-icon name="description" color="primary" />
@@ -574,7 +578,12 @@ function onSeleccionarContratista(val) {
       solicitud.value.identificacion = encontrado.documento
     }
     if (encontrado.numeroContrato) {
-      solicitud.value.numeroContrato = encontrado.numeroContrato
+      solicitud.value.numeroContrato = editando.value
+        ? encontrado.numeroContrato
+        : obtenerSiguienteNumeroContrato(encontrado.numeroContrato)
+      if (!editando.value) {
+        solicitud.value.numeroSolicitud = `SOL-${String(solicitud.value.numeroContrato).replace(/\D/g, '').slice(-4).padStart(4, '0')}`
+      }
     }
     // Si no es un supervisor imponiendo su área, cargar la dependencia y supervisor por defecto del contratista
     if (auth.rolUsuario !== 'SUPERVISOR') {
@@ -586,7 +595,12 @@ function onSeleccionarContratista(val) {
       }
     }
   } else if (typeof val === 'object' && val.numeroContrato) {
-    solicitud.value.numeroContrato = val.numeroContrato
+    solicitud.value.numeroContrato = editando.value
+      ? val.numeroContrato
+      : obtenerSiguienteNumeroContrato(val.numeroContrato)
+    if (!editando.value) {
+      solicitud.value.numeroSolicitud = `SOL-${String(solicitud.value.numeroContrato).replace(/\D/g, '').slice(-4).padStart(4, '0')}`
+    }
   }
 }
 
@@ -1328,10 +1342,55 @@ async function confirmarCambioEstado() {
   solicitudSeleccionada.value = null
 }
 
+function obtenerSiguienteNumeroContrato(baseContrato) {
+  const existentes = new Set(
+    (store.solicitudes || []).map((s) =>
+      String(s.numeroContrato || s.contrato || '').toUpperCase().trim(),
+    ),
+  )
+
+  if (baseContrato && !existentes.has(String(baseContrato).toUpperCase().trim())) {
+    return String(baseContrato).trim()
+  }
+
+  let maxNum = 0
+  for (const c of existentes) {
+    const match = c.match(/CNT-2026-(\d+)/i)
+    if (match) {
+      const n = parseInt(match[1], 10)
+      if (n > maxNum && n < 9000) maxNum = n
+    }
+  }
+  let siguiente = Math.max(maxNum + 1, 56)
+  while (existentes.has(`CNT-2026-${String(siguiente).padStart(3, '0')}`)) {
+    siguiente++
+  }
+  return `CNT-2026-${String(siguiente).padStart(3, '0')}`
+}
+
+function alCambiarNumeroContrato(val) {
+  if (!editando.value && val) {
+    const digitos = String(val).replace(/\D/g, '').slice(-4).padStart(4, '0')
+    solicitud.value.numeroSolicitud = `SOL-${digitos || '2026'}`
+  }
+}
+
+function validarNumeroContratoUnico(val) {
+  if (editando.value) return true
+  if (!val) return true
+  const numNormalizado = String(val).trim().toUpperCase()
+  const existe = (store.solicitudes || []).some((s) => {
+    const c = String(s.numeroContrato || s.contrato || '').trim().toUpperCase()
+    return c === numNormalizado
+  })
+  if (existe) {
+    return `El contrato "${val}" ya tiene una solicitud registrada. Ingrese un número diferente (ej. nueva vigencia o consecutivo).`
+  }
+  return true
+}
+
 function nuevaSolicitud() {
   limpiarFormulario()
-  const randomSuffix = Math.floor(100 + Math.random() * 900)
-  solicitud.value.numeroSolicitud = `SOL-2026-${randomSuffix}`
 
   if (auth.rolUsuario === 'SUPERVISOR') {
     // Si el usuario autenticado es Supervisor, asignar por defecto su dependencia y a él como responsable
@@ -1350,13 +1409,16 @@ function nuevaSolicitud() {
 
     if (contratistaACargo) {
       solicitud.value.contratista = contratistaACargo.nombre
-      solicitud.value.numeroContrato =
-        contratistaACargo.numeroContrato || `CNT-2026-${randomSuffix}`
+      solicitud.value.identificacion = contratistaACargo.documento || ''
+      solicitud.value.documentoContratista = contratistaACargo.documento || ''
+      solicitud.value.numeroContrato = obtenerSiguienteNumeroContrato(
+        contratistaACargo.numeroContrato,
+      )
     } else {
-      solicitud.value.numeroContrato = `CNT-2026-${randomSuffix}`
+      solicitud.value.numeroContrato = obtenerSiguienteNumeroContrato()
     }
   } else if (auth.rolUsuario === 'CONTRATISTA' && auth.usuario?.nombre) {
-    // Si el usuario autenticado es Contratista, autoasignar sus datos y contrato
+    // Si el usuario autenticado es Contratista, autoasignar sus datos y contrato único no repetido
     const miNombre = auth.usuario.nombre
     solicitud.value.contratista = miNombre
     const encontrado = (contratistasStore.contratistas || []).find(
@@ -1364,8 +1426,17 @@ function nuevaSolicitud() {
         c.nombre.toLowerCase().includes(miNombre.toLowerCase()) ||
         miNombre.toLowerCase().includes(c.nombre.toLowerCase()),
     )
-    solicitud.value.numeroContrato =
-      encontrado?.numeroContrato || auth.usuario?.numero_contrato || `CNT-2026-${randomSuffix}`
+    const doc =
+      encontrado?.documento ||
+      auth.usuario?.documento ||
+      auth.usuario?.identificacion ||
+      '1096543210'
+    solicitud.value.identificacion = doc
+    solicitud.value.documentoContratista = doc
+
+    solicitud.value.numeroContrato = obtenerSiguienteNumeroContrato(
+      encontrado?.numeroContrato || auth.usuario?.numero_contrato,
+    )
 
     if (encontrado?.dependencia) {
       solicitud.value.dependencia = encontrado.dependencia
@@ -1384,12 +1455,13 @@ function nuevaSolicitud() {
       solicitud.value.contratista = primerContratista.nombre
       solicitud.value.identificacion = primerContratista.documento || ''
       solicitud.value.documentoContratista = primerContratista.documento || ''
-      solicitud.value.numeroContrato =
-        primerContratista.numeroContrato || `CNT-2026-${randomSuffix}`
+      solicitud.value.numeroContrato = obtenerSiguienteNumeroContrato(
+        primerContratista.numeroContrato,
+      )
       solicitud.value.dependencia = primerContratista.dependencia || 'Gestión Tecnológica (TIC)'
       solicitud.value.responsable = primerContratista.supervisor || 'Ing. Carlos Supervisor'
     } else {
-      solicitud.value.numeroContrato = `CNT-2026-${randomSuffix}`
+      solicitud.value.numeroContrato = obtenerSiguienteNumeroContrato()
       if (dependenciasStore.dependencias.length > 0) {
         const primeraDep =
           dependenciasStore.dependencias.find((d) => d.estado !== 'Inactiva') ||
@@ -1400,6 +1472,8 @@ function nuevaSolicitud() {
     }
   }
 
+  const numFinal = solicitud.value.numeroContrato
+  solicitud.value.numeroSolicitud = `SOL-${String(numFinal).replace(/\D/g, '').slice(-4).padStart(4, '0')}`
   solicitud.value.estado = 'En revisión'
   dialogo.value = true
 }
