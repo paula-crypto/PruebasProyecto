@@ -21,9 +21,30 @@
           <div class="text-caption">Paz y Salvo Contractual</div>
         </q-toolbar-title>
 
-        <!-- Botón de Notificaciones -->
-        <q-btn flat round icon="notifications" :to="{ name: 'notificaciones' }" class="q-mr-xs">
-          <q-tooltip>Notificaciones</q-tooltip>
+        <!-- Botón de Notificaciones con Badge estilo WhatsApp -->
+        <q-btn
+          flat
+          round
+          icon="notifications"
+          :to="{ name: 'notificaciones' }"
+          class="q-mr-xs notif-btn-header"
+        >
+          <q-badge
+            v-if="notifStore.totalNoLeidas > 0"
+            floating
+            color="red-7"
+            rounded
+            class="notif-badge-whatsapp text-weight-bolder"
+          >
+            {{ notifStore.totalNoLeidas > 99 ? '99+' : notifStore.totalNoLeidas }}
+          </q-badge>
+          <q-tooltip>
+            {{
+              notifStore.totalNoLeidas > 0
+                ? `${notifStore.totalNoLeidas} notificaciones pendientes`
+                : 'Notificaciones del sistema'
+            }}
+          </q-tooltip>
         </q-btn>
 
         <!-- Botón de Identidad de Usuario con Menú Desplegable -->
@@ -145,10 +166,11 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useAuthStore } from '../stores/authStore.js'
+import { useNotificacionesStore } from '../stores/useNotificacionesStore.js'
 
 const normalizarRol = (valor) => {
   const v = String(valor || '')
@@ -166,6 +188,18 @@ const $q = useQuasar()
 const leftDrawerOpen = ref($q.screen.gt.sm)
 const router = useRouter()
 const auth = useAuthStore()
+const notifStore = useNotificacionesStore()
+
+onMounted(() => {
+  notifStore.cargarNotificaciones()
+})
+
+watch(
+  () => auth.usuario,
+  () => {
+    notifStore.cargarNotificaciones()
+  },
+)
 
 const rolLegible = computed(() => {
   const r = normalizarRol(auth.usuario?.rol || auth.rolUsuario)
@@ -313,6 +347,37 @@ function cerrarDrawerEnMovil() {
 }
 .header-user-btn:hover {
   background-color: rgba(255, 255, 255, 0.15);
+}
+
+.notif-btn-header {
+  position: relative;
+}
+
+.notif-badge-whatsapp {
+  top: 3px;
+  right: 3px;
+  font-size: 11px;
+  min-height: 19px;
+  min-width: 19px;
+  padding: 0 4px;
+  border: 2px solid #2e7d32;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse-whatsapp 2.5s infinite ease-in-out;
+}
+
+@keyframes pulse-whatsapp {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* Reglas definitivas para impresión y PDF */
