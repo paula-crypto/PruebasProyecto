@@ -1171,10 +1171,7 @@ async function guardarSolicitud() {
 
   if (editando.value) {
     const idBusqueda = codigoEditar.value
-
-    if (typeof store.actualizarSolicitud === 'function') {
-      await store.actualizarSolicitud(idBusqueda, { ...solicitud.value })
-    }
+    const datosEditados = { ...solicitud.value }
 
     if (Array.isArray(store.solicitudes)) {
       const index = store.solicitudes.findIndex(
@@ -1190,63 +1187,75 @@ async function guardarSolicitud() {
       if (index !== -1) {
         store.solicitudes[index] = {
           ...store.solicitudes[index],
-          ...solicitud.value,
+          ...datosEditados,
           numeroSolicitud:
-            solicitud.value.numeroSolicitud ||
+            datosEditados.numeroSolicitud ||
             store.solicitudes[index].numeroSolicitud ||
             store.solicitudes[index].solicitud,
         }
       }
     }
-    $q.notify({ type: 'positive', message: 'Solicitud y estado actualizados correctamente.' })
+
     limpiarFormulario()
-  } else {
-    try {
-      if (typeof store.agregarSolicitud === 'function') {
-        await store.agregarSolicitud({ ...solicitud.value })
-      } else if (Array.isArray(store.solicitudes)) {
-        store.solicitudes.unshift({
-          ...solicitud.value,
-          recienCreada: true,
-          timestampCreacion: Date.now(),
-          createdAt: new Date().toISOString(),
-        })
-      }
-      try {
-        const num = solicitud.value.numeroContrato || ''
-        const nom = solicitud.value.contratista || ''
-        const u = auth.usuario || {}
-        const claveUser = String(u.id || u._id || u.correo || 'default').trim()
-        const keySesion = `solicitudes_creadas_${claveUser}`
+    $q.notify({ type: 'positive', message: 'Solicitud y estado actualizados correctamente.', timeout: 2500 })
 
-        const creadas = JSON.parse(sessionStorage.getItem(keySesion) || '[]')
-        if (num) {
-          creadas.push(num)
-          creadas.push(num.toLowerCase().trim())
-        }
-        if (nom) {
-          creadas.push(nom)
-          creadas.push(nom.toLowerCase().trim())
-        }
-        sessionStorage.setItem(keySesion, JSON.stringify(creadas))
-
-        const creadasOrden = JSON.parse(sessionStorage.getItem('solicitudes_creadas_orden') || '[]')
-        if (num) creadasOrden.unshift({ clave: num, ts: Date.now() })
-        sessionStorage.setItem('solicitudes_creadas_orden', JSON.stringify(creadasOrden))
-      } catch {
-        /* noop */
-      }
-      paginationTable.value.page = 1
-      filtro.value = ''
-      $q.notify({
-        type: 'positive',
-        message: 'Solicitud registrada correctamente en MongoDB Atlas.',
+    if (typeof store.actualizarSolicitud === 'function') {
+      store.actualizarSolicitud(idBusqueda, datosEditados).catch((err) => {
+        console.warn('Error al sincronizar actualización:', err.message)
       })
-      limpiarFormulario()
-    } catch (err) {
-      $q.notify({
-        type: 'negative',
-        message: 'Error al registrar solicitud: ' + (err.message || ''),
+    }
+  } else {
+    const datosNuevos = { ...solicitud.value }
+    const num = datosNuevos.numeroContrato || ''
+    const nom = datosNuevos.contratista || ''
+    const u = auth.usuario || {}
+    const claveUser = String(u.id || u._id || u.correo || 'default').trim()
+    const keySesion = `solicitudes_creadas_${claveUser}`
+
+    try {
+      const creadas = JSON.parse(sessionStorage.getItem(keySesion) || '[]')
+      if (num) {
+        creadas.push(num)
+        creadas.push(num.toLowerCase().trim())
+      }
+      if (nom) {
+        creadas.push(nom)
+        creadas.push(nom.toLowerCase().trim())
+      }
+      sessionStorage.setItem(keySesion, JSON.stringify(creadas))
+
+      const creadasOrden = JSON.parse(sessionStorage.getItem('solicitudes_creadas_orden') || '[]')
+      if (num) creadasOrden.unshift({ clave: num, ts: Date.now() })
+      sessionStorage.setItem('solicitudes_creadas_orden', JSON.stringify(creadasOrden))
+    } catch {
+      /* noop */
+    }
+
+    // Cerrar inmediatamente el modal para evitar congelamiento de pantalla
+    limpiarFormulario()
+    paginationTable.value.page = 1
+    filtro.value = ''
+
+    $q.notify({
+      type: 'positive',
+      message: 'Solicitud registrada correctamente.',
+      timeout: 2500,
+    })
+
+    if (typeof store.agregarSolicitud === 'function') {
+      store.agregarSolicitud(datosNuevos).catch((err) => {
+        $q.notify({
+          type: 'warning',
+          message: 'Aviso al registrar en MongoDB Atlas: ' + (err.message || ''),
+          timeout: 4000,
+        })
+      })
+    } else if (Array.isArray(store.solicitudes)) {
+      store.solicitudes.unshift({
+        ...datosNuevos,
+        recienCreada: true,
+        timestampCreacion: Date.now(),
+        createdAt: new Date().toISOString(),
       })
     }
   }

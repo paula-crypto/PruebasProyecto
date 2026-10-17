@@ -539,7 +539,7 @@ export const useSolicitudesStore = defineStore('solicitudes', () => {
           },
         ],
       })
-      await cargarSolicitudes()
+      cargarSolicitudes().catch((e) => console.warn('Sync Atlas:', e.message))
     } catch (err) {
       console.error(
         'Error al registrar contrato en Atlas:',
